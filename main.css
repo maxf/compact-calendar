@@ -1,0 +1,46 @@
+html {
+  font-family: sans-serif;
+}
+
+thead {
+  background-color: #888;
+  color: white;
+}
+
+th {
+  padding: .3em 0em .1em 0em;
+}
+
+/* hack to add space between table head and body */
+tbody:before {
+    line-height:1em;
+    content:"===";
+    color:white;
+    display:block;
+}
+
+td {
+  text-align: center;
+  width: 30px;
+}
+
+td:first-child {
+  text-align: left;
+}
+
+.newMonth {
+  background-color: cyan;
+}
+
+.firstDayOfMonth {
+  background-color: #ddf;
+  border-top: 2px solid cyan;
+}
+
+.beforeFirst {
+  border-bottom: 2px solid cyan;
+}
+
+.afterFirst {
+  border-top: 2px solid cyan;
+}
