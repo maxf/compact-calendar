@@ -7,9 +7,14 @@ class CalendarDate { // Date can't be subclassed :(
   setToNextWeek() { return this._addDays(7); }
   setToYesterday() { return this._addDays(-1); }
   setToPrevWeek() { return this._addDays(-7); }
+  setToNextDays(numDays) { return this._addDays(numDays); }
 
   nextWeek() {
     return this.clone().setToNextWeek();
+  }
+
+  nextDays(numDays) {
+    return this.clone().setToNextDays(numDays);
   }
 
   clone() {
@@ -73,14 +78,14 @@ class Calendar {
 
     day = day.previousMonday();
     while (day.getFullYear() <= this.year) {
-
-      let isFirstWeekInMonth = day.getDate() > day.nextWeek().getDate();
+      let date = day.getDate();
+      let isFirstWeekInMonth = date===1 || date > day.nextDays(6).getDate();
       let firstColText = isFirstWeekInMonth ? this.months[day.getMonth()] : '';
       let week = [];
 
       for (let dow=0; dow<7; dow++) {
         let classAttr;
-        let date = day.getDate();
+        date = day.getDate();
         if (isFirstWeekInMonth) {
           if (date >= 23) {
             classAttr = 'beforeFirst'; // this day is before the first day of the next month
