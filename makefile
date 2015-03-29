@@ -1,3 +1,6 @@
-calendar.js: calendar6.js
-	babel calendar6.js -o calendar.js
+all: calendar.js
+
+%.js : %.js6
+	babel $< -o $@
+
 
