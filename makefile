@@ -1,11 +1,3 @@
-JS_FILES = calendarDate.js calendar.js main.js
-JS_DIST = build/dist.js
-
-$(JS_DIST): $(JS_FILES)
-	browserify main.js -t babelify > $@
-
-clean:
-	rm $(JS_DIST)
-
-
-
+build/dist.js: calendarDate.js calendar.js main.js
+	mkdir -p build
+	browserify -d main.js -t babelify > $@

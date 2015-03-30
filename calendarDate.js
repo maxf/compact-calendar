@@ -1,4 +1,4 @@
-export class CalendarDate { // Date can't be subclassed :(
+export default class CalendarDate { // Date can't be subclassed :(
   constructor(...date) {
     this.date = new Date(...date);
   }
@@ -53,5 +53,3 @@ export class CalendarDate { // Date can't be subclassed :(
     return this;
   }
 }
-
-module.exports = CalendarDate;

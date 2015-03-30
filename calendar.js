@@ -1,4 +1,4 @@
-import CalendarDate from './calendarDate.js';
+import CalendarDate from './calendarDate';
 
 export default class Calendar {
 
@@ -52,4 +52,3 @@ export default class Calendar {
 
 }
 
-module.exports = Calendar;
