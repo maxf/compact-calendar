@@ -53,3 +53,5 @@ export class CalendarDate { // Date can't be subclassed :(
     return this;
   }
 }
+
+module.exports = CalendarDate;

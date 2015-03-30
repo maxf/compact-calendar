@@ -51,3 +51,5 @@ export default class Calendar {
   }
 
 }
+
+module.exports = Calendar;
