@@ -1,4 +1,5 @@
 import CalendarDate from './calendarDate';
+import $ from './jquery';
 
 export default class Calendar {
 
@@ -8,9 +9,18 @@ export default class Calendar {
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   }
 
+
+  setEventListeners() {
+    $('td.day').on('click', function() {
+      $(this).toggleClass('marked');
+    });
+  }
+
+
   toHtml() {
     let calHtml=['<table><thead><tr><th>Month</th>'];
     let day = new CalendarDate(this.year, 0, 1, 12); /* new year's day at midday */
+    let weekNumber = 1;
 
     // populate header with labels for days of week
     for (let dow=0; dow<7; dow++) {
@@ -20,12 +30,15 @@ export default class Calendar {
     calHtml.push('</thead></tbody>');
 
     day = day.previousMonday();
+
+    // iterate weeks
     while (day.getFullYear() <= this.year) {
       let date = day.getDate();
       let isFirstWeekInMonth = date===1 || date > day.nextDays(6).getDate();
-      let firstColText = isFirstWeekInMonth ? this.months[day.getMonth()] : '';
+      let firstColText = isFirstWeekInMonth ? this.months[day.nextWeek().getMonth()] : '';
       let week = [];
 
+      // iterate day of this week
       for (let dow=0; dow<7; dow++) {
         let classAttr;
         date = day.getDate();
@@ -38,11 +51,12 @@ export default class Calendar {
             classAttr = 'afterFirst'; // this day is after the first day of the next month
           }
         }
-        week.push(`<td ${classAttr?'class="'+classAttr+'"':''}>${date}</td>`);
+        week.push(`<td class="day ${classAttr||''}">${date}</td>`);
 
         day.setToTomorrow();
       }
-      calHtml.push(`<tr><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}</tr>`);
+      calHtml.push(`<tr id="week${weekNumber}"><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}<td><input id="input${weekNumber}" type="text"/></td></tr>`);
+      weekNumber++;
     }
 
     calHtml.push('</tbody></table>');
@@ -50,5 +64,5 @@ export default class Calendar {
     return calHtml.join('');
   }
 
-}
+};
 
