@@ -2,6 +2,20 @@ html {
   font-family: sans-serif;
 }
 
+table {
+  font-size: 14px;
+  border-collapse: collapse;
+}
+
+@media print {
+  html {
+    font-size: 10px;
+  }
+  table {
+    font-size: 12px;
+  }
+}
+
 thead {
   background-color: #888;
   color: white;
@@ -21,7 +35,8 @@ tbody:before {
 
 td {
   text-align: center;
-  width: 30px;
+  width: 1.5em;
+  padding: .2em;
 }
 
 td:first-child {
@@ -48,4 +63,13 @@ td:nth-child(7), td:nth-child(8) {
 
 .afterFirst {
   border-top: 2px solid #99b;
+}
+
+input[type='text'] {
+  border: none;
+  width: 30em;
+}
+
+td.marked {
+  background-color: #f99;
 }
