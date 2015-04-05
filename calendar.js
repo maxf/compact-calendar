@@ -7,15 +7,25 @@ export default class Calendar {
     this.year = year;
     this.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    this.markedDays = {};
   }
 
 
   setEventListeners() {
+    var _this = this;
     $('td.day').on('click', function() {
       $(this).toggleClass('marked');
+      if ($(this).hasClass('marked')) {
+        _this.markedDays[$(this).attr('id')] = true;
+        console.log(_this.markedDays);
+      } else {
+        delete _this.markedDays[$(this).attr('id')];
+      }
+
+      window.localStorage.setItem('markedDays', JSON.stringify(_this.markedDays));
     });
   }
-
 
   toHtml() {
     let calHtml=['<table><thead><tr><th>Month</th>'];
@@ -51,7 +61,7 @@ export default class Calendar {
             classAttr = 'afterFirst'; // this day is after the first day of the next month
           }
         }
-        week.push(`<td class="day ${classAttr||''}">${date}</td>`);
+        week.push(`<td id="day-${day.getTime()}" class="day ${classAttr||''}">${date}</td>`);
 
         day.setToTomorrow();
       }

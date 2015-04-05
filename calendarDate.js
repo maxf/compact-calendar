@@ -25,6 +25,7 @@ export default class CalendarDate { // Date can't be subclassed :(
   getDate() { return this.date.getDate(); }
   getMonth() { return this.date.getMonth(); }
   getFullYear() { return this.date.getFullYear(); }
+  getTime() { return this.date.getTime(); }
   toString() { return this.date.toString(); }
 
   /* private */
