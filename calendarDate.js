@@ -9,17 +9,9 @@ export default class CalendarDate { // Date can't be subclassed :(
   setToPrevWeek() { return this._addDays(-7); }
   setToNextDays(numDays) { return this._addDays(numDays); }
 
-  nextWeek() {
-    return this.clone().setToNextWeek();
-  }
-
-  nextDays(numDays) {
-    return this.clone().setToNextDays(numDays);
-  }
-
-  clone() {
-    return new CalendarDate(this.date);
-  }
+  nextWeek() { return this.clone().setToNextWeek(); }
+  nextDays(numDays) { return this.clone().setToNextDays(numDays); }
+  clone() { return new CalendarDate(this.date); }
 
   previousMonday() {
     var newDate = this.clone();
@@ -30,21 +22,10 @@ export default class CalendarDate { // Date can't be subclassed :(
     return newDate;
   }
 
-  getDate() {
-    return this.date.getDate();
-  }
-
-  getMonth() {
-    return this.date.getMonth();
-  }
-
-  getFullYear() {
-    return this.date.getFullYear();
-  }
-
-  toString() {
-    return this.date.toString();
-  }
+  getDate() { return this.date.getDate(); }
+  getMonth() { return this.date.getMonth(); }
+  getFullYear() { return this.date.getFullYear(); }
+  toString() { return this.date.toString(); }
 
   /* private */
 
