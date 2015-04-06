@@ -13,14 +13,15 @@ export default class Calendar {
 
   setEventListeners() {
     var _this = this;
-    $('td.day').on('click', function() {
-      $(this).toggleClass('marked');
-      if ($(this).hasClass('marked')) {
-        _this.markedDays[$(this).attr('id')] = true;
+    $('td.day').on('click', event => {
+      let target = $(event.target);
+      target.toggleClass('marked');
+      if (target.hasClass('marked')) {
+        this.markedDays[target.attr('id')] = true;
       } else {
-        delete _this.markedDays[$(this).attr('id')];
+        delete this.markedDays[target.attr('id')];
       }
-      window.localStorage.setItem('markedDays', JSON.stringify(_this.markedDays));
+      window.localStorage.setItem('markedDays', JSON.stringify(this.markedDays));
     });
 
     $('input').on('change', event => {
