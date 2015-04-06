@@ -8,6 +8,7 @@ export default class Calendar {
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     this.markedDays = this._fetchFromLocalStorage('markedDays');
+    this.weekNotes = this._fetchFromLocalStorage('weekNotes');
   }
 
   setEventListeners() {
@@ -19,9 +20,19 @@ export default class Calendar {
       } else {
         delete _this.markedDays[$(this).attr('id')];
       }
-
       window.localStorage.setItem('markedDays', JSON.stringify(_this.markedDays));
     });
+
+    $('input').on('change', event => {
+      var weekId = $(event.target).parents('tr').attr('id');
+      if (event.target.value) {
+        this.weekNotes[weekId] = event.target.value;
+      } else {
+        delete this.weekNotes[weekId];
+      }
+      window.localStorage.setItem('weekNotes', JSON.stringify(this.weekNotes));      
+    });
+
   }
 
   _fetchFromLocalStorage(name) {
@@ -74,7 +85,8 @@ export default class Calendar {
 
         day.setToTomorrow();
       }
-      calHtml.push(`<tr id="week${weekNumber}"><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}<td><input id="input${weekNumber}" type="text"/></td></tr>`);
+      let weekId = "week-"+weekNumber;
+      calHtml.push(`<tr id="${weekId}"><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}<td><input id="input${weekNumber}" type="text" value="${this.weekNotes[weekId]||''}"/></td></tr>`);
       weekNumber++;
     }
 
