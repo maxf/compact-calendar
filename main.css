@@ -51,8 +51,8 @@ td:nth-child(7), td:nth-child(8) {
   background-color: cyan;
 }
 
-.firstDayOfMonth {
-  background-color: #ddf!important;
+td.firstDayOfMonth {
+  background-color: #ddf;
   border-top: 2px solid #99b;
   border-left: 2px solid #99b;
 }
