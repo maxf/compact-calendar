@@ -1,5 +1,4 @@
 import CalendarDate from './calendarDate';
-import $ from './jquery';
 
 export default class Calendar {
 
@@ -21,7 +20,6 @@ export default class Calendar {
       $(this).toggleClass('marked');
       if ($(this).hasClass('marked')) {
         _this.markedDays[$(this).attr('id')] = true;
-        console.log(_this.markedDays);
       } else {
         delete _this.markedDays[$(this).attr('id')];
       }

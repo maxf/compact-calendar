@@ -1,5 +1,4 @@
 import Calendar from './calendar';
-import $ from './jquery';
 
 $(document).ready(function() {
   'use strict';
