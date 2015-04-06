@@ -8,11 +8,7 @@ export default class Calendar {
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     this.markedDays = this._fetchFromLocalStorage('markedDays');
-    for (let markedDay in this.markedDays) {
-      $(`#${markedDay}`).addClass('marked');
-    }
   }
-
 
   setEventListeners() {
     var _this = this;
@@ -70,7 +66,11 @@ export default class Calendar {
             classAttr = 'afterFirst'; // this day is after the first day of the next month
           }
         }
-        week.push(`<td id="day-${day.getTime()}" class="day ${classAttr||''}">${date}</td>`);
+        let dayClasses="day";
+        let id = 'day-' + day.getTime();
+        if (this.markedDays[id]) { dayClasses += ' marked'; }
+        if (classAttr) { dayClasses += ' ' + classAttr; }
+        week.push(`<td id="day-${day.getTime()}" class="${dayClasses}">${date}</td>`);
 
         day.setToTomorrow();
       }
