@@ -7,8 +7,8 @@ export default class Calendar {
     this.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    this.markedDays = this.fetchFromLocalStorage('markedDays');
-    this.weekNotes = this.fetchFromLocalStorage('weekNotes');
+    this.markedDays = Calendar.fetchFromLocalStorage('markedDays');
+    this.weekNotes = Calendar.fetchFromLocalStorage('weekNotes');
   }
 
   setEventListeners() {
@@ -33,14 +33,6 @@ export default class Calendar {
       window.localStorage.setItem('weekNotes', JSON.stringify(this.weekNotes));
     });
 
-  }
-
-  static fetchFromLocalStorage(name) {
-    try {
-      return JSON.parse(window.localStorage[name]);
-    } catch(err) {
-      return {};
-    }
   }
 
   toHtml() {
@@ -94,5 +86,16 @@ export default class Calendar {
 
     return calHtml.join('');
   }
+
+  //== static ==============
+
+  static fetchFromLocalStorage(name) {
+    try {
+      return JSON.parse(window.localStorage[name]);
+    } catch(err) {
+      return {};
+    }
+  }
+
 
 }
