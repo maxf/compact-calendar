@@ -7,8 +7,8 @@ export default class Calendar {
     this.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    this.markedDays = this._fetchFromLocalStorage('markedDays');
-    this.weekNotes = this._fetchFromLocalStorage('weekNotes');
+    this.markedDays = this.fetchFromLocalStorage('markedDays');
+    this.weekNotes = this.fetchFromLocalStorage('weekNotes');
   }
 
   setEventListeners() {
@@ -35,7 +35,7 @@ export default class Calendar {
 
   }
 
-  _fetchFromLocalStorage(name) {
+  static fetchFromLocalStorage(name) {
     try {
       return JSON.parse(window.localStorage[name]);
     } catch(err) {
