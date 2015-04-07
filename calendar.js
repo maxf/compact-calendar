@@ -12,9 +12,8 @@ export default class Calendar {
   }
 
   setEventListeners() {
-    var _this = this;
     $('td.day').on('click', event => {
-      let target = $(event.target);
+      const target = $(event.target);
       target.toggleClass('marked');
       if (target.hasClass('marked')) {
         this.markedDays[target.attr('id')] = true;
@@ -25,13 +24,13 @@ export default class Calendar {
     });
 
     $('input').on('change', event => {
-      var weekId = $(event.target).parents('tr').attr('id');
+      const weekId = $(event.target).parents('tr').attr('id');
       if (event.target.value) {
         this.weekNotes[weekId] = event.target.value;
       } else {
         delete this.weekNotes[weekId];
       }
-      window.localStorage.setItem('weekNotes', JSON.stringify(this.weekNotes));      
+      window.localStorage.setItem('weekNotes', JSON.stringify(this.weekNotes));
     });
 
   }
@@ -79,14 +78,14 @@ export default class Calendar {
           }
         }
         let dayClasses="day";
-        let id = 'day-' + day.getTime();
+        const id = 'day-' + day.getTime();
         if (this.markedDays[id]) { dayClasses += ' marked'; }
         if (classAttr) { dayClasses += ' ' + classAttr; }
         week.push(`<td id="day-${day.getTime()}" class="${dayClasses}">${date}</td>`);
 
         day.setToTomorrow();
       }
-      let weekId = "week-"+weekNumber;
+      const weekId = "week-"+weekNumber;
       calHtml.push(`<tr id="${weekId}"><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}<td><input id="input${weekNumber}" type="text" value="${this.weekNotes[weekId]||''}"/></td></tr>`);
       weekNumber++;
     }
@@ -96,5 +95,4 @@ export default class Calendar {
     return calHtml.join('');
   }
 
-};
-
+}
