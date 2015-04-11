@@ -1,4 +1,5 @@
 import CalendarDate from './calendarDate';
+import StorageSync from './storageSync';
 
 export default class Calendar {
 
@@ -8,7 +9,9 @@ export default class Calendar {
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
     this.markedDays = Calendar.fetchFromLocalStorage('markedDays');
-    this.weekNotes = Calendar.fetchFromLocalStorage('weekNotes');
+    this.weekNotes =  Calendar.fetchFromLocalStorage('weekNotes');
+
+    new StorageSync(10);
   }
 
   setEventListeners() {
@@ -34,6 +37,21 @@ export default class Calendar {
     });
 
   }
+
+  static fetchFromLocalStorage(name) {
+    try {
+      return JSON.parse(window.localStorage[name]);
+    } catch(err) {
+      return {};
+    }
+  }
+
+
+  static writeToLocalStorage(name) {
+      this.name.modificationTime = new Date();
+      window.localStorage.setItem(name, JSON.stringify(this[name]));
+  }
+
 
   toHtml() {
     let calHtml=['<table><thead><tr><th>Month</th>'];
@@ -96,6 +114,4 @@ export default class Calendar {
       return {};
     }
   }
-
-
 }
