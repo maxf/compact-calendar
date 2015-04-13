@@ -17,3 +17,12 @@ We use babel to transpile, which requires the following setup:
     npm install -g browserify babel
     npm install babelify
 
+## Backend
+
+The application stores data in the browser's local storage. There is a background process that synchronises that data with a MongoDB instance. In order to run that:
+
+- start MongoDB: mongod --dbpath=/tmp --port 27017
+- install the server: cd backend && npm install
+- start the server: node app.js
+
+
