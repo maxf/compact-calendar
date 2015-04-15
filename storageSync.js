@@ -2,24 +2,20 @@ const backendUrl = 'http://localhost:8080';
 
 export default class StorageSync {
 
-  constructor(keys) {
-    this.keys = keys;
+  constructor(intervalInSeconds) {
+    StorageSync.sync();
+//    window.setInterval(StorageSync.sync, intervalInSeconds * 1000);
   }
 
 
-  sync() {
-
-    for (let key of this.keys) {
-
-    // for each key, we should check localstorage.key and server.key and take the most recent
-    // instead, start simple and get all from the server
-
-
-
-      console.log(key);
+  static sync() {
+    var key, val;
+    for (let i=0; i<localStorage.length; i++) {
+      // start simple and send all to the server
+      key = localStorage.key(i);
+      val = localStorage[key];
+      console.log(key, val);
     }
-
-
 
   }
 
@@ -41,17 +37,17 @@ export default class StorageSync {
 //  }
 //
 //
-//  saveToServer() {
-//    $.post(backendUrl + '/post',
-//      {calendarData: JSON.stringify({markedDays: this.markedDays, weekNotes: this.weekNotes})},
-//      (data) => {
-//        console.log("data saved");
-//      })
-//    .fail((error) => {
-//        console.log("error: ", error);
-//    });
-//  }
+
+  static pushToServer(key, valObj) {
+    $.post(backendUrl + '/post',
+      {calendarData: JSON.stringify({markedDays: this.markedDays, weekNotes: this.weekNotes})},
+      (data) => {
+        console.log("data saved");
+      })
+    .fail((error) => {
+        console.log("error: ", error);
+    });
+  }
 
 
 }
-

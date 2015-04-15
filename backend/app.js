@@ -1,7 +1,10 @@
 /* jshint node: true */
 "use strict";
 
-const PORT=8080;
+const PORT = 8080;
+const DBNAME = 'compact-calendar';
+const COLLECTIONNAME = 'documents';
+const DBURL = 'mongodb://localhost:27017/' + DBNAME;
 
 
 const http = require('http');
@@ -10,7 +13,6 @@ const MongoClient = require('mongodb').MongoClient;
 const assert = require('assert');
 const server = http.createServer(handleRequest);
 
-const dbUrl = 'mongodb://localhost:27017/compact-calendar';
 var dataBase;
 var collection;
 
@@ -52,40 +54,49 @@ function handleRequest(request, response){
 
 dispatcher.setStatic('resources');
 
-dispatcher.onGet("/get", (req, res) => {
+
+dispatcher.onGet("/collections", (req, res) => {
+  var collections = dataBase.listCollections({}).toArray(function(err, items) {
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    console.log(items);
+    res.end(JSON.stringify(items));
+  });
+});
+
+dispatcher.onGet('/'+COLLECTIONNAME+'/', (req, res) => {
   getCalendarData((docs) => {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(JSON.stringify(docs));
   });
 });
 
 dispatcher.onPost("/clear", (req, res) => {
   clearCalendarData((reply) => {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
+    res.writeHead(200, {'Content-Type': 'application/json'});
     res.end('cleared: '+reply);
   });
 });
 
-dispatcher.onPost("/post", (req, res) => {
-  if (req.params.calendarData) {
-    postCalendarData(req.params.calendarData, (docs) => {
-      res.writeHead(200, {'Content-Type': 'text/plain'});
-      res.end(JSON.stringify(docs));
-    });
-  } else {
-    res.writeHead(400, {'Content-Type': 'text/plain'});
-    res.end("missing parameter");
-  }
+dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
+  console.log(req.params);
+  // each POST parameter will be uploaded as one document
+  let documentArray = [];
+  for (let postItem in req.params) { documentArray.push(JSON.parse(req.params[postItem])); }
+  console.log(documentArray);
+  collection.insertMany(documentArray, (err, result) => {
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify(result));
+  });
 });
 
 
 //== Main ==
 
 
-MongoClient.connect(dbUrl, (err, db) => {
+MongoClient.connect(DBURL, (err, db) => {
   assert.equal(null, err);
   dataBase = db;
-  collection = db.collection('documents');
+  collection = db.collection(COLLECTIONNAME);
   server.listen(PORT, () => {
     console.log("Server listening on: http://localhost:%s", PORT);
   });
