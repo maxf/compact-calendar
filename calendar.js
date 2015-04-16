@@ -38,15 +38,6 @@ export default class Calendar {
 
   }
 
-  static fetchFromLocalStorage(name) {
-    try {
-      return JSON.parse(window.localStorage[name]);
-    } catch(err) {
-      return {};
-    }
-  }
-
-
   static writeToLocalStorage(name) {
       this.name.modificationTime = new Date();
       window.localStorage.setItem(name, JSON.stringify(this[name]));

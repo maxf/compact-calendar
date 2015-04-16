@@ -51,12 +51,12 @@ dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
   // each POST parameter will be uploaded as one document
   let documentArray = [];
   try {
-    for (let postItem of req.params) {
-        documentArray.push(JSON.parse(req.params[postItem]));
+    for (let param in req.params) {
+      documentArray.push(JSON.parse(req.params[param]));
     }
   } catch (e) {
     res.writeHead(400, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({'error': 'invalid parameters'}));
+    res.end(JSON.stringify({'error': 'invalid JSON'}));
     return;
   }
   collection.insertMany(documentArray, (err, result) => {
@@ -68,7 +68,7 @@ dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
 dispatcher.onPost('/'+COLLECTIONNAME+'/clear/', (req, res) => {
   collection.drop((err, reply) => {
     res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end('cleared: '+reply);
+    res.end(JSON.stringify({status:"cleared"}));
   });
 });
 
