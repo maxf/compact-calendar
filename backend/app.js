@@ -65,7 +65,7 @@ dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
   });
 });
 
-dispatcher.onPost("/clear", (req, res) => {
+dispatcher.onPost('/'+COLLECTIONNAME+'/clear/', (req, res) => {
   collection.drop((err, reply) => {
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end('cleared: '+reply);
