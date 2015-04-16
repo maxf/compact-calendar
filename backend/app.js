@@ -16,29 +16,6 @@ const server = http.createServer(handleRequest);
 var dataBase;
 var collection;
 
-var getCalendarData = function(callback) {
-  collection.find({}).toArray((err, docs) => {
-    assert.equal(err, null);
-    callback(docs);
-  });
-};
-
-var clearCalendarData = function(callback) {
-  collection.drop((err, reply) => {
-    callback(reply);
-  });
-};
-
-var postCalendarData = function(calendarData, callback) {
-  console.log("CAL",calendarData);
-  const calDataObj = JSON.parse(calendarData);
-  collection.drop((err, reply) => {
-    collection.insert(calDataObj, (err, result) => {
-      callback(result);
-    });
-  });
-};
-
 function handleRequest(request, response){
   try {
     console.log(request.url);
@@ -63,7 +40,7 @@ dispatcher.onGet("/collections", (req, res) => {
 });
 
 dispatcher.onGet('/'+COLLECTIONNAME+'/', (req, res) => {
-  getCalendarData((docs) => {
+  collection.find({}).toArray((err, docs) => {
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end(JSON.stringify(docs));
   });
@@ -74,7 +51,7 @@ dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
   // each POST parameter will be uploaded as one document
   let documentArray = [];
   try {
-    for (let postItem in req.params) {
+    for (let postItem of req.params) {
         documentArray.push(JSON.parse(req.params[postItem]));
     }
   } catch (e) {
@@ -89,7 +66,7 @@ dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
 });
 
 dispatcher.onPost("/clear", (req, res) => {
-  clearCalendarData((reply) => {
+  collection.drop((err, reply) => {
     res.writeHead(200, {'Content-Type': 'application/json'});
     res.end('cleared: '+reply);
   });
