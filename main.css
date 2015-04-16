@@ -9,11 +9,17 @@ table {
 
 @media print {
   html {
-    font-size: 10px;
+    font-size: 8px;
   }
   table {
-    font-size: 12px;
+    font-size: 10px;
   }
+  input[type='text'] {
+    border: none;
+    width: 30em;
+    font-size: 8px!important;
+  }
+
 }
 
 thead {
@@ -68,6 +74,7 @@ td.firstDayOfMonth {
 input[type='text'] {
   border: none;
   width: 30em;
+  font-size: 15px;
 }
 
 td.marked {
