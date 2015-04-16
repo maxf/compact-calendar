@@ -57,9 +57,8 @@ dispatcher.setStatic('resources');
 
 dispatcher.onGet("/collections", (req, res) => {
   var collections = dataBase.listCollections({}).toArray(function(err, items) {
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    console.log(items);
-    res.end(JSON.stringify(items));
+  res.writeHead(200, {'Content-Type': 'application/json'});
+  res.end(JSON.stringify(items));
   });
 });
 
@@ -70,6 +69,25 @@ dispatcher.onGet('/'+COLLECTIONNAME+'/', (req, res) => {
   });
 });
 
+dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
+  console.log(req.params);
+  // each POST parameter will be uploaded as one document
+  let documentArray = [];
+  try {
+    for (let postItem in req.params) {
+        documentArray.push(JSON.parse(req.params[postItem]));
+    }
+  } catch (e) {
+    res.writeHead(400, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({'error': 'invalid parameters'}));
+    return;
+  }
+  collection.insertMany(documentArray, (err, result) => {
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify(result));
+  });
+});
+
 dispatcher.onPost("/clear", (req, res) => {
   clearCalendarData((reply) => {
     res.writeHead(200, {'Content-Type': 'application/json'});
@@ -77,17 +95,6 @@ dispatcher.onPost("/clear", (req, res) => {
   });
 });
 
-dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
-  console.log(req.params);
-  // each POST parameter will be uploaded as one document
-  let documentArray = [];
-  for (let postItem in req.params) { documentArray.push(JSON.parse(req.params[postItem])); }
-  console.log(documentArray);
-  collection.insertMany(documentArray, (err, result) => {
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify(result));
-  });
-});
 
 
 //== Main ==
