@@ -11,7 +11,7 @@ export default class Calendar {
     this.markedDays = Calendar.fetchFromLocalStorage('markedDays');
     this.weekNotes =  Calendar.fetchFromLocalStorage('weekNotes');
 
-    new StorageSync(10);
+    new StorageSync(10); // first sync should happen before any interaction. Need a "loading" indicator and synchronous loading.
   }
 
   setEventListeners() {
