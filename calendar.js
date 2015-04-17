@@ -3,15 +3,22 @@ import StorageSync from './storageSync';
 
 export default class Calendar {
 
-  constructor(year = new Date().getFullYear()) {
+  constructor(htmlId, year = new Date().getFullYear()) {
     this.year = year;
+    this.$html = $('#'+htmlId);
     this.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    this.markedDays = Calendar.fetchFromLocalStorage('markedDays');
-    this.weekNotes =  Calendar.fetchFromLocalStorage('weekNotes');
 
-    new StorageSync(10); // first sync should happen before any interaction. Need a "loading" indicator and synchronous loading.
+    this.synchroniser = new StorageSync();
+    this.$html.text("please wait");
+    this.synchroniser.pullFromServer(
+      () => {
+        this.markedDays = Calendar.fetchFromLocalStorage('markedDays');
+        this.weekNotes =  Calendar.fetchFromLocalStorage('weekNotes');
+        this.$html.html(this.toHtml());
+      },
+      () => { this.$html.text("data import failed"); });
   }
 
   setEventListeners() {
@@ -35,7 +42,6 @@ export default class Calendar {
       }
       window.localStorage.setItem('weekNotes', JSON.stringify(this.weekNotes));
     });
-
   }
 
   toHtml() {

@@ -2,9 +2,28 @@ const backendUrl = 'http://localhost:8080';
 
 export default class StorageSync {
 
-  constructor(intervalInSeconds) {
-    StorageSync.sync();
-    window.setInterval(StorageSync.sync, intervalInSeconds * 1000);
+  constructor() {
+//    this.pullFromServer();
+//    window.setInterval(StorageSync.sync, intervalInSeconds * 1000);
+  }
+
+  pullFromServer(successCallback, errorCallback) {
+    $.get(backendUrl + '/documents/',
+      (data, status) => {
+        console.log('got docs', data);
+        window.localStorage.clear();
+        for (let key in data) {
+          if (data.hasOwnProperty(key)) {
+            window.localStorage.setItem(key, data[key]);
+          }
+        }
+        successCallback();
+      }
+    )
+    .fail(() => {
+      console.log('error pulling from server');
+      errorCallback();
+    });
   }
 
   static sync() {
@@ -12,11 +31,10 @@ export default class StorageSync {
   }
 
   static pushToServer() {
-
     $.post(backendUrl + '/documents/clear/',
       (data) => {
         $.post(backendUrl + '/documents/',
-          localStorage,
+          window.localStorage,
           (data) => {
             console.log("data saved to server");
           })
@@ -28,4 +46,4 @@ export default class StorageSync {
         console.log("error clearing server storage", b);
       });
   }
-};
+}
