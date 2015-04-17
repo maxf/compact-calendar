@@ -38,12 +38,6 @@ export default class Calendar {
 
   }
 
-  static writeToLocalStorage(name) {
-      this.name.modificationTime = new Date();
-      window.localStorage.setItem(name, JSON.stringify(this[name]));
-  }
-
-
   toHtml() {
     let calHtml=['<table><thead><tr><th>Month</th>'];
     let day = new CalendarDate(this.year, 0, 1, 12); /* new year's day at midday */
