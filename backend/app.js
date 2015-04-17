@@ -18,7 +18,7 @@ var collection;
 
 function handleRequest(request, response){
   try {
-    console.log(request.url);
+    console.log("Received: ", request.url);
     response.setHeader('Access-Control-Allow-Origin', '*');
 
     dispatcher.dispatch(request, response);
@@ -33,16 +33,20 @@ dispatcher.setStatic('resources');
 
 
 dispatcher.onGet("/collections", (req, res) => {
-  var collections = dataBase.listCollections({}).toArray(function(err, items) {
-  res.writeHead(200, {'Content-Type': 'application/json'});
-  res.end(JSON.stringify(items));
+  var collections = dataBase.listCollections({}).toArray((err, items) => {
+    res.writeHead(200, {'Content-Type': 'application/json'});
+    let body = JSON.stringify(items);
+    res.end(body);
+    console.log('sending 200: ', body);
   });
 });
 
 dispatcher.onGet('/'+COLLECTIONNAME+'/', (req, res) => {
   collection.find({}).toArray((err, docs) => {
     res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify(docs));
+    let body = JSON.stringify(docs);
+    res.end(body);
+    console.log('sending 200: ', body);
   });
 });
 
