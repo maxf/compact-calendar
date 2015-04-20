@@ -51,22 +51,25 @@ dispatcher.onGet('/'+COLLECTIONNAME+'/', (req, res) => {
 });
 
 dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
-  console.log(req.params);
-  // each POST parameter will be uploaded as one document
-  let documentArray = [];
-  try {
-    for (let param in req.params) {
-      documentArray.push(JSON.parse(req.params[param]));
+  if (Object.keys(req.params).length) {
+    console.log('received: ', req.params);
+    let documentArray = [];
+    try {
+      for (let param in req.params) {
+        console.log('param: ', param, req.params[param]);
+        documentArray.push(JSON.parse(req.params[param]));
+      }
+    } catch (e) {
+      res.writeHead(400, {'Content-Type': 'application/json'});
+      res.end(JSON.stringify({'error': 'invalid JSON'}));
+      return;
     }
-  } catch (e) {
-    res.writeHead(400, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({'error': 'invalid JSON'}));
-    return;
+    console.log('documentArray: ', documentArray);
+    collection.insertMany(documentArray, (err, result) => {
+      res.writeHead(200, {'Content-Type': 'application/json'});
+      res.end(JSON.stringify(result));
+    });
   }
-  collection.insertMany(documentArray, (err, result) => {
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify(result));
-  });
 });
 
 dispatcher.onPost('/'+COLLECTIONNAME+'/clear/', (req, res) => {

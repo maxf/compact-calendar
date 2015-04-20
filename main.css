@@ -19,7 +19,9 @@ table {
     width: 30em;
     font-size: 8px!important;
   }
-
+  button {
+    display: none;
+  }
 }
 
 thead {

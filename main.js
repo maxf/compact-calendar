@@ -3,10 +3,11 @@ import Calendar from './calendar';
 $(() => {
   'use strict';
 
-  var cal = new Calendar("calendar");
+  const cal = new Calendar("calendar");
 
-//  $('#calendar').html(cal.toHtml());
-  cal.setEventListeners();
+  $('#clear').on('click', () => {
+    window.localStorage.clear();
+  });
 
 
 });

@@ -9,16 +9,15 @@ export default class Calendar {
     this.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-
-    this.synchroniser = new StorageSync();
+    this.synchroniser = new StorageSync(10);
     this.$html.text("please wait");
-    this.synchroniser.pullFromServer(
-      () => {
-        this.markedDays = Calendar.fetchFromLocalStorage('markedDays');
-        this.weekNotes =  Calendar.fetchFromLocalStorage('weekNotes');
-        this.$html.html(this.toHtml());
-      },
-      () => { this.$html.text("data import failed"); });
+    this.synchroniser.pullFromServer((success) => {
+      if (!success) { alert("couldn't talk to server. Using browser storage."); }
+      this.markedDays = Calendar.fetchFromLocalStorage('markedDays');
+      this.weekNotes =  Calendar.fetchFromLocalStorage('weekNotes');
+      this.$html.html(this.toHtml());
+      this.setEventListeners();
+    });
   }
 
   setEventListeners() {
