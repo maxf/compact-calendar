@@ -1,5 +1,5 @@
 import CalendarDate from './calendarDate';
-import StorageSync from './storageSync';
+import SyncedStorage from './syncedStorage';
 
 export default class Calendar {
 
@@ -9,12 +9,11 @@ export default class Calendar {
     this.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    this.synchroniser = new StorageSync(10);
     this.$html.text("please wait");
-    this.synchroniser.pullFromServer((success) => {
+    this.storage = new SyncedStorage((success) => {
       if (!success) { alert("couldn't talk to server. Using browser storage."); }
-      this.markedDays = Calendar.fetchFromLocalStorage('markedDays');
-      this.weekNotes =  Calendar.fetchFromLocalStorage('weekNotes');
+      this.markedDays = this.storage.getItem('markedDays') || {};
+      this.weekNotes =  this.storage.getItem('weekNotes') || {};
       this.$html.html(this.toHtml());
       this.setEventListeners();
     });
@@ -29,7 +28,7 @@ export default class Calendar {
       } else {
         delete this.markedDays[target.attr('id')];
       }
-      window.localStorage.setItem('markedDays', JSON.stringify(this.markedDays));
+      this.storage.setItem('markedDays', JSON.stringify(this.markedDays));
     });
 
     $('input').on('change', event => {
@@ -39,7 +38,7 @@ export default class Calendar {
       } else {
         delete this.weekNotes[weekId];
       }
-      window.localStorage.setItem('weekNotes', JSON.stringify(this.weekNotes));
+      this.storage.setItem('weekNotes', JSON.stringify(this.weekNotes));
     });
   }
 
@@ -79,14 +78,14 @@ export default class Calendar {
         }
         let dayClasses="day";
         const id = 'day-' + day.getTime();
-        if (this.markedDays[id]) { dayClasses += ' marked'; }
+        if (Calendar.markedDay[id]) { dayClasses += ' marked'; }
         if (classAttr) { dayClasses += ' ' + classAttr; }
         week.push(`<td id="day-${day.getTime()}" class="${dayClasses}">${date}</td>`);
 
         day.setToTomorrow();
       }
       const weekId = "week-"+weekNumber;
-      calHtml.push(`<tr id="${weekId}"><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}<td><input id="input${weekNumber}" type="text" value="${this.weekNotes[weekId]||''}"/></td></tr>`);
+      calHtml.push(`<tr id="${weekId}"><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}<td><input id="input${weekNumber}" type="text" value="${Calendar.weekNote(weekId)||''}"/></td></tr>`);
       weekNumber++;
     }
 
@@ -97,11 +96,15 @@ export default class Calendar {
 
   //== static ==============
 
-  static fetchFromLocalStorage(name) {
+  static weekNote(weekId) {
     try {
-      return JSON.parse(window.localStorage[name]);
-    } catch(err) {
-      return {};
+      return this.weekNotes[weekId];
+    } catch(e) {
+      return undefined;
     }
+  }
+
+  static markedDay(dayId) {
+    return this.markedDays && this.markedDays[dayId];
   }
 }

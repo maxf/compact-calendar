@@ -1,12 +1,39 @@
 const backendUrl = 'http://localhost:8080';
 
-export default class StorageSync {
+export default class SyncedStorage {
 
-  constructor(intervalInSeconds) {
-    this.timer = window.setInterval(StorageSync.sync, intervalInSeconds * 1000);
+  constructor(callback) {
+    SyncedStorage.pullFromServer((success) => {
+      if (success) {
+        this.timer = window.setInterval(SyncedStorage.sync, 10000);
+        console.log('timer:',this.timer);
+        this.modified = false;
+      }
+      callback(success);
+    });
   }
 
-  pullFromServer(callback) {
+  getItem(key) {
+    try {
+      return JSON.parse(window.localStorage[key]);
+    } catch(e) {
+      return undefined;
+    }
+  }
+
+  setItem(key, value) {
+    console.log("set");
+    this.modified = true;
+    return window.localStorage.setItem(key, value);
+  }
+
+
+
+
+  // === Static =======================
+
+
+  static pullFromServer(callback) {
     $.get(backendUrl + '/documents/',
       (data, status) => {
         console.log('got docs', data);
@@ -20,7 +47,7 @@ export default class StorageSync {
       }
     )
     .fail(() => {
-      StorageSync.stopSync();
+      SyncedStorage.stopSync();
       callback(false);
     });
   }
@@ -30,7 +57,12 @@ export default class StorageSync {
   }
 
   static sync() {
-    StorageSync.pushToServer();
+    console.log('sync');
+    if (this.modified) {
+      console.log('yes');
+      SyncedStorage.pushToServer();
+      this.modified = false;
+    } else console.log('no');
   }
 
   static pushToServer() {
@@ -43,12 +75,12 @@ export default class StorageSync {
               console.log("data saved to server");
             })
           .fail((jxhr, error) => {
-            StorageSync.stopSync();
+            SyncedStorage.stopSync();
             console.log("error: ", error);
           });
         })
         .fail((a,b) => {
-          StorageSync.stopSync();
+          SyncedStorage.stopSync();
           console.log("error clearing server storage", b);
         });
       }
