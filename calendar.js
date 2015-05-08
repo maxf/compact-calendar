@@ -1,3 +1,5 @@
+'use strict';
+
 import CalendarDate from './calendarDate';
 import SyncedStorage from './syncedStorage';
 
@@ -78,14 +80,14 @@ export default class Calendar {
         }
         let dayClasses="day";
         const id = 'day-' + day.getTime();
-        if (Calendar.markedDay[id]) { dayClasses += ' marked'; }
+        if (this.markedDay(id)) { dayClasses += ' marked'; }
         if (classAttr) { dayClasses += ' ' + classAttr; }
         week.push(`<td id="day-${day.getTime()}" class="${dayClasses}">${date}</td>`);
 
         day.setToTomorrow();
       }
       const weekId = "week-"+weekNumber;
-      calHtml.push(`<tr id="${weekId}"><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}<td><input id="input${weekNumber}" type="text" value="${Calendar.weekNote(weekId)||''}"/></td></tr>`);
+      calHtml.push(`<tr id="${weekId}"><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}<td><input id="input${weekNumber}" type="text" value="${this.weekNote(weekId)||''}"/></td></tr>`);
       weekNumber++;
     }
 
@@ -94,9 +96,7 @@ export default class Calendar {
     return calHtml.join('');
   }
 
-  //== static ==============
-
-  static weekNote(weekId) {
+  weekNote(weekId) {
     try {
       return this.weekNotes[weekId];
     } catch(e) {
@@ -104,7 +104,7 @@ export default class Calendar {
     }
   }
 
-  static markedDay(dayId) {
+  markedDay(dayId) {
     return this.markedDays && this.markedDays[dayId];
   }
 }

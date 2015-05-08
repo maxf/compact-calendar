@@ -44,7 +44,7 @@ dispatcher.onGet("/collections", (req, res) => {
 dispatcher.onGet('/'+COLLECTIONNAME+'/', (req, res) => {
   collection.find({}).toArray((err, docs) => {
     res.writeHead(200, {'Content-Type': 'application/json'});
-    let body = JSON.stringify(docs);
+    let body = JSON.stringify(docs[0]);
     res.end(body);
     console.log('sending 200: ', body);
   });
@@ -52,7 +52,8 @@ dispatcher.onGet('/'+COLLECTIONNAME+'/', (req, res) => {
 
 dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
   if (Object.keys(req.params).length) {
-    console.log('received: ', req.params);
+    console.log('POST params: ', req.params);
+/*
     let documentArray = [];
     try {
       for (let param in req.params) {
@@ -66,6 +67,8 @@ dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
     }
     console.log('documentArray: ', documentArray);
     collection.insertMany(documentArray, (err, result) => {
+*/
+    collection.insert(req.params, (err, result) => {
       res.writeHead(200, {'Content-Type': 'application/json'});
       res.end(JSON.stringify(result));
     });

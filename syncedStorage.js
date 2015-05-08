@@ -1,12 +1,13 @@
+'use strict';
+
 const backendUrl = 'http://localhost:8080';
 
 export default class SyncedStorage {
 
   constructor(callback) {
-    SyncedStorage.pullFromServer((success) => {
+    this.pullFromServer((success) => {
       if (success) {
-        this.timer = window.setInterval(SyncedStorage.sync, 10000);
-        console.log('timer:',this.timer);
+        this.timer = window.setInterval(this.sync.bind(this), 10000);
         this.modified = false;
       }
       callback(success);
@@ -22,24 +23,26 @@ export default class SyncedStorage {
   }
 
   setItem(key, value) {
-    console.log("set");
     this.modified = true;
     return window.localStorage.setItem(key, value);
   }
 
+  stopSync() {
+    window.clearInterval(this.timer);
+  }
 
+  sync() {
+    if (this.modified) {
+      this.pushToServer();
+      this.modified = false;
+    }
+  }
 
-
-  // === Static =======================
-
-
-  static pullFromServer(callback) {
+  pullFromServer(callback) {
     $.get(backendUrl + '/documents/',
       (data, status) => {
-        console.log('got docs', data);
         for (let key in data) {
           if (data.hasOwnProperty(key)) {
-            console.log(key, data[key]);
             window.localStorage.setItem(key, data[key]);
           }
         }
@@ -47,42 +50,30 @@ export default class SyncedStorage {
       }
     )
     .fail(() => {
-      SyncedStorage.stopSync();
+      this.stopSync();
       callback(false);
     });
   }
 
-  static stopSync() {
-    window.clearInterval(this.timer);
-  }
-
-  static sync() {
-    console.log('sync');
-    if (this.modified) {
-      console.log('yes');
-      SyncedStorage.pushToServer();
-      this.modified = false;
-    } else console.log('no');
-  }
-
-  static pushToServer() {
+  pushToServer() {
     if (localStorage.length) {
       $.post(backendUrl + '/documents/clear/',
         (data) => {
           $.post(backendUrl + '/documents/',
             window.localStorage,
             (data) => {
-              console.log("data saved to server");
+              console.log("data saved to server:", window.localStorage);
             })
           .fail((jxhr, error) => {
-            SyncedStorage.stopSync();
+            this.stopSync();
             console.log("error: ", error);
           });
         })
         .fail((a,b) => {
-          SyncedStorage.stopSync();
+          this.stopSync();
           console.log("error clearing server storage", b);
         });
       }
     }
 }
+
