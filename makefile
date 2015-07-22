@@ -1,7 +1,6 @@
-build/dist.js: calendarDate.js calendar.js main.js syncedStorage.js
+build/dist.js: src/calendarDate.js src/calendar.js src/main.js src/syncedStorage.js
 	mkdir -p build
-	browserify -d main.js -t babelify > $@
-	@echo "done."
+	browserify -d src/main.js -t babelify > $@
 
 clean:
 	rm build/dist.js

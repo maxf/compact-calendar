@@ -1,9 +1,11 @@
 import Calendar from './calendar';
 
-$(() => {
-  'use strict';
+var $;
 
-  const cal = new Calendar("calendar");
+$(() => {
+
+  var cal = new Calendar('calendar');
+  cal.draw();
 
   $('#clear').on('click', () => {
     window.localStorage.clear();

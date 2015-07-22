@@ -1,5 +1,7 @@
-/* jshint node: true */
-"use strict";
+var require;
+
+(function() {
+'use strict';
 
 const PORT = 8080;
 const DBNAME = 'compact-calendar';
@@ -18,12 +20,12 @@ var collection;
 
 function handleRequest(request, response){
   try {
-    console.log("Received: ", request.url);
+    console.log('Received: ', request.url);
     response.setHeader('Access-Control-Allow-Origin', '*');
 
     dispatcher.dispatch(request, response);
   } catch(err) {
-    console.log("ERROR: ", err);
+    console.log('ERROR: ', err);
   }
 }
 
@@ -32,8 +34,8 @@ function handleRequest(request, response){
 dispatcher.setStatic('resources');
 
 
-dispatcher.onGet("/collections", (req, res) => {
-  var collections = dataBase.listCollections({}).toArray((err, items) => {
+dispatcher.onGet('/collections', (req, res) => {
+  dataBase.listCollections({}).toArray((err, items) => {
     res.writeHead(200, {'Content-Type': 'application/json'});
     let body = JSON.stringify(items);
     res.end(body);
@@ -76,9 +78,9 @@ dispatcher.onPost('/'+COLLECTIONNAME+'/', (req, res) => {
 });
 
 dispatcher.onPost('/'+COLLECTIONNAME+'/clear/', (req, res) => {
-  collection.drop((err, reply) => {
+  collection.drop(() => {
     res.writeHead(200, {'Content-Type': 'application/json'});
-    res.end(JSON.stringify({status:"cleared"}));
+    res.end(JSON.stringify({status: 'cleared'}));
   });
 });
 
@@ -92,6 +94,8 @@ MongoClient.connect(DBURL, (err, db) => {
   dataBase = db;
   collection = db.collection(COLLECTIONNAME);
   server.listen(PORT, () => {
-    console.log("Server listening on: http://localhost:%s", PORT);
+    console.log('Server listening on: http://localhost:%s', PORT);
   });
 });
+
+}());

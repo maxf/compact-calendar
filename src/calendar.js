@@ -1,7 +1,7 @@
-'use strict';
-
 import CalendarDate from './calendarDate';
 import SyncedStorage from './syncedStorage';
+
+var $;
 
 export default class Calendar {
 
@@ -11,15 +11,20 @@ export default class Calendar {
     this.months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     this.daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-    this.$html.text("please wait");
+    this.$html.text('please wait');
     this.storage = new SyncedStorage((success) => {
-      if (!success) { alert("couldn't talk to server. Using browser storage."); }
+      if (!success) { console.log('couldn\'t talk to server. Using browser storage.'); }
       this.markedDays = this.storage.getItem('markedDays') || {};
-      this.weekNotes =  this.storage.getItem('weekNotes') || {};
-      this.$html.html(this.toHtml());
+      this.weekNotes = this.storage.getItem('weekNotes') || {};
+      this.draw();
       this.setEventListeners();
     });
   }
+
+  draw() {
+    this.$html.html(this.toHtml());
+  }
+
 
   setEventListeners() {
     $('td.day').on('click', event => {
@@ -51,7 +56,7 @@ export default class Calendar {
 
     // populate header with labels for days of week
     for (let dow=0; dow<7; dow++) {
-      calHtml.push(`<th>${this.daysOfWeek[dow].substr(0,2)}</th>`);
+      calHtml.push(`<th>${this.daysOfWeek[dow].substr(0, 2)}</th>`);
     }
 
     calHtml.push('</thead></tbody>');
@@ -78,15 +83,15 @@ export default class Calendar {
             classAttr = 'afterFirst'; // this day is after the first day of the next month
           }
         }
-        let dayClasses="day";
+        let dayClasses='day';
         const id = 'day-' + day.getTime();
         if (this.markedDay(id)) { dayClasses += ' marked'; }
         if (classAttr) { dayClasses += ' ' + classAttr; }
-        week.push(`<td id="day-${day.getTime()}" class="${dayClasses}">${date}</td>`);
+        week.push(`<td id='day-${day.getTime()}' class='${dayClasses}'>${date}</td>`);
 
         day.setToTomorrow();
       }
-      const weekId = "week-"+weekNumber;
+      const weekId = 'week-'+weekNumber;
       calHtml.push(`<tr id="${weekId}"><td ${isFirstWeekInMonth?'class="newMonth"':''}>${firstColText}</td>${week.join('')}<td><input id="input${weekNumber}" type="text" value="${this.weekNote(weekId)||''}"/></td></tr>`);
       weekNumber++;
     }
