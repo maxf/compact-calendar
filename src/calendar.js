@@ -1,7 +1,7 @@
+/*global $*/
+
 import CalendarDate from './calendarDate';
 import SyncedStorage from './syncedStorage';
-
-var $;
 
 export default class Calendar {
 

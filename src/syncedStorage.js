@@ -1,4 +1,4 @@
-'use strict';
+/*global $*/
 
 const backendUrl = 'http://localhost:8080';
 
