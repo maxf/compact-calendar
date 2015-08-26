@@ -40,7 +40,7 @@ export default class SyncedStorage {
 
   pullFromServer(callback) {
     $.get(backendUrl + '/documents/',
-      (data, status) => {
+      (data) => {
         for (let key in data) {
           if (data.hasOwnProperty(key)) {
             window.localStorage.setItem(key, data[key]);
@@ -58,22 +58,21 @@ export default class SyncedStorage {
   pushToServer() {
     if (localStorage.length) {
       $.post(backendUrl + '/documents/clear/',
-        (data) => {
+        () => {
           $.post(backendUrl + '/documents/',
             window.localStorage,
-            (data) => {
-              console.log("data saved to server:", window.localStorage);
+            () => {
+              console.log('data saved to server:', window.localStorage);
             })
           .fail((jxhr, error) => {
             this.stopSync();
-            console.log("error: ", error);
+            console.log('error: ', error);
           });
         })
-        .fail((a,b) => {
+        .fail((a, b) => {
           this.stopSync();
-          console.log("error clearing server storage", b);
+          console.log('error clearing server storage', b);
         });
       }
     }
 }
-
