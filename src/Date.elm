@@ -110,7 +110,7 @@ firstDateOfWeekZero: Int -> Date
 firstDateOfWeekZero year =
     let
         janFirst = Date year Jan 1
-        dowJanFirst = janFirst |> toPosix |> toWeekday Time.utc |> Debug.log ">>>>"
+        dowJanFirst = janFirst |> toPosix |> toWeekday Time.utc
     in
     case dowJanFirst of
         Mon -> janFirst
@@ -140,6 +140,22 @@ format (Date y m d) =
 getDay: Date -> Int
 getDay (Date _ _ d) =
     d
+
+getMonthNumber: Date -> Int
+getMonthNumber (Date y m d) =
+    case m of
+        Jan -> 1
+        Feb -> 2
+        Mar -> 3
+        Apr -> 4
+        May -> 5
+        Jun -> 6
+        Jul -> 7
+        Aug -> 8
+        Sep -> 9
+        Oct -> 10
+        Nov -> 11
+        Dec -> 12
 
 
 fromMonth: Month -> String

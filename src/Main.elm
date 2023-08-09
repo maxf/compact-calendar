@@ -2,10 +2,10 @@ module Main exposing (..)
 
 import Browser
 import Html exposing (Html, button, div, text, table, tr, th, td)
-import Html.Attributes exposing (title)
+import Html.Attributes exposing (title, class)
 import Html.Events exposing (onClick)
 import Time exposing (Posix, Weekday(..), millisToPosix)
-import Date exposing (Date(..), dateForWeek, firstDateOfWeekZero, addDay, fromMonth, format, getDay)
+import Date exposing (Date(..), dateForWeek, firstDateOfWeekZero, addDay, fromMonth, format, getDay, getMonthNumber)
 
 
 -- MAIN
@@ -47,21 +47,30 @@ update msg model =
 
 -- VIEW
 
--- we need to know the dow of the first of the year
+viewCalendarCell: Date -> Html Msg
+viewCalendarCell date =
+    let
+        monthClass = if modBy 2 (getMonthNumber date) == 0 then "oddMonth" else "evenMonth"
+    in
+    td
+        [ title (format date)
+        , class monthClass
+        ]
+        [ date |> getDay |> String.fromInt |> text ]
+
+
 
 viewWeek : Int -> Int -> Html Msg
 viewWeek year weekNumber =
     let
         firstDateOf0 = firstDateOfWeekZero year
-        cellDate: Int -> Html Msg
-        cellDate i =
-            let
-                d = addDay firstDateOf0 (weekNumber * 7 + i)
-            in
-            td [ title (format d)] [ d |> getDay |> String.fromInt |> text ]
+        cellHtml: Int -> Html Msg
+        cellHtml i =
+            viewCalendarCell (addDay firstDateOf0 (weekNumber * 7 + i))
     in
     tr []
-        (List.map cellDate (List.range 0 7))
+        (List.map cellHtml (List.range 0 7))
+
 
 viewWeeks : Int -> Html Msg
 viewWeeks year =

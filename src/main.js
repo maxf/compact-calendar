@@ -5396,7 +5396,6 @@ var $author$project$Date$addDay = F2(
 				(add * $author$project$Date$millisInDay) + $elm$time$Time$posixToMillis(
 					$author$project$Date$toPosix(d))));
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $elm$time$Time$Fri = {$: 'Fri'};
 var $elm$time$Time$Mon = {$: 'Mon'};
 var $elm$time$Time$Sat = {$: 'Sat'};
@@ -5433,12 +5432,9 @@ var $elm$time$Time$toWeekday = F2(
 var $author$project$Date$firstDateOfWeekZero = function (year) {
 	var janFirst = A3($author$project$Date$Date, year, $elm$time$Time$Jan, 1);
 	var dowJanFirst = A2(
-		$elm$core$Debug$log,
-		'>>>>',
-		A2(
-			$elm$time$Time$toWeekday,
-			$elm$time$Time$utc,
-			$author$project$Date$toPosix(janFirst)));
+		$elm$time$Time$toWeekday,
+		$elm$time$Time$utc,
+		$author$project$Date$toPosix(janFirst));
 	switch (dowJanFirst.$) {
 		case 'Mon':
 			return janFirst;
@@ -5456,6 +5452,16 @@ var $author$project$Date$firstDateOfWeekZero = function (year) {
 			return A2($author$project$Date$addDay, janFirst, -6);
 	}
 };
+var $elm$html$Html$tr = _VirtualDom_node('tr');
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $author$project$Date$format = function (_v0) {
 	var y = _v0.a;
 	var m = _v0.b;
@@ -5491,42 +5497,72 @@ var $author$project$Date$getDay = function (_v0) {
 	var d = _v0.c;
 	return d;
 };
+var $author$project$Date$getMonthNumber = function (_v0) {
+	var y = _v0.a;
+	var m = _v0.b;
+	var d = _v0.c;
+	switch (m.$) {
+		case 'Jan':
+			return 1;
+		case 'Feb':
+			return 2;
+		case 'Mar':
+			return 3;
+		case 'Apr':
+			return 4;
+		case 'May':
+			return 5;
+		case 'Jun':
+			return 6;
+		case 'Jul':
+			return 7;
+		case 'Aug':
+			return 8;
+		case 'Sep':
+			return 9;
+		case 'Oct':
+			return 10;
+		case 'Nov':
+			return 11;
+		default:
+			return 12;
+	}
+};
 var $elm$html$Html$td = _VirtualDom_node('td');
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
-var $elm$html$Html$tr = _VirtualDom_node('tr');
+var $author$project$Main$viewCalendarCell = function (date) {
+	var monthClass = (!A2(
+		$elm$core$Basics$modBy,
+		2,
+		$author$project$Date$getMonthNumber(date))) ? 'oddMonth' : 'evenMonth';
+	return A2(
+		$elm$html$Html$td,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$title(
+				$author$project$Date$format(date)),
+				$elm$html$Html$Attributes$class(monthClass)
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				$elm$core$String$fromInt(
+					$author$project$Date$getDay(date)))
+			]));
+};
 var $author$project$Main$viewWeek = F2(
 	function (year, weekNumber) {
 		var firstDateOf0 = $author$project$Date$firstDateOfWeekZero(year);
-		var cellDate = function (i) {
-			var d = A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + i);
-			return A2(
-				$elm$html$Html$td,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$title(
-						$author$project$Date$format(d))
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(
-							$author$project$Date$getDay(d)))
-					]));
+		var cellHtml = function (i) {
+			return $author$project$Main$viewCalendarCell(
+				A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + i));
 		};
 		return A2(
 			$elm$html$Html$tr,
 			_List_Nil,
 			A2(
 				$elm$core$List$map,
-				cellDate,
+				cellHtml,
 				A2($elm$core$List$range, 0, 7)));
 	});
 var $author$project$Main$viewWeeks = function (year) {
