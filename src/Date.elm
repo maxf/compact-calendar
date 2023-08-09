@@ -109,23 +109,51 @@ dateForWeek weekday weekNumber year =
 firstDateOfWeekZero: Int -> Date
 firstDateOfWeekZero year =
     let
-        janFirst: Date
         janFirst = Date year Jan 1
-        dowJanFirst: Weekday
-        dowJanFirst = janFirst |> toPosix |> toWeekday Time.utc
+        dowJanFirst = janFirst |> toPosix |> toWeekday Time.utc |> Debug.log ">>>>"
     in
     case dowJanFirst of
-        Mon ->
-            janFirst
-        Tue ->
-            addDay janFirst -1
-        Wed ->
-            addDay janFirst -2
-        Thu ->
-            addDay janFirst -2
-        Fri ->
-            addDay janFirst -2
-        Sat ->
-            addDay janFirst -2
-        Sun ->
-            addDay janFirst -2
+        Mon -> janFirst
+        Tue -> addDay janFirst -1
+        Wed -> addDay janFirst -2
+        Thu -> addDay janFirst -3
+        Fri -> addDay janFirst -4
+        Sat -> addDay janFirst -5
+        Sun -> addDay janFirst -6
+
+format: Date -> String
+format (Date y m d) =
+    case m of
+        Jan -> (String.fromInt d) ++ " January " ++ (String.fromInt y)
+        Feb -> (String.fromInt d) ++ " February" ++ (String.fromInt y)
+        Mar -> (String.fromInt d) ++ " March" ++ (String.fromInt y)
+        Apr -> (String.fromInt d) ++ " April" ++ (String.fromInt y)
+        May -> (String.fromInt d) ++ " May" ++ (String.fromInt y)
+        Jun -> (String.fromInt d) ++ " June" ++ (String.fromInt y)
+        Jul -> (String.fromInt d) ++ " July" ++ (String.fromInt y)
+        Aug -> (String.fromInt d) ++ " August" ++ (String.fromInt y)
+        Sep -> (String.fromInt d) ++ " September" ++ (String.fromInt y)
+        Oct -> (String.fromInt d) ++ " October" ++ (String.fromInt y)
+        Nov -> (String.fromInt d) ++ " November" ++ (String.fromInt y)
+        Dec -> (String.fromInt d) ++ " December" ++ (String.fromInt y)
+
+getDay: Date -> Int
+getDay (Date _ _ d) =
+    d
+
+
+fromMonth: Month -> String
+fromMonth month =
+    case month of
+        Jan -> "January"
+        Feb -> "February"
+        Mar -> "March"
+        Apr -> "April"
+        May -> "May"
+        Jun -> "June"
+        Jul -> "July"
+        Aug -> "August"
+        Sep -> "September"
+        Oct -> "October"
+        Nov -> "November"
+        Dec -> "December"

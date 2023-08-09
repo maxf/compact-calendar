@@ -2,9 +2,10 @@ module Main exposing (..)
 
 import Browser
 import Html exposing (Html, button, div, text, table, tr, th, td)
+import Html.Attributes exposing (title)
 import Html.Events exposing (onClick)
 import Time exposing (Posix, Weekday(..), millisToPosix)
-import Date exposing (Date(..), dateForWeek, firstDateOfWeekZero)
+import Date exposing (Date(..), dateForWeek, firstDateOfWeekZero, addDay, fromMonth, format, getDay)
 
 
 -- MAIN
@@ -51,17 +52,16 @@ update msg model =
 viewWeek : Int -> Int -> Html Msg
 viewWeek year weekNumber =
     let
-        (Date y m d) = firstDateOfWeekZero year
+        firstDateOf0 = firstDateOfWeekZero year
+        cellDate: Int -> Html Msg
+        cellDate i =
+            let
+                d = addDay firstDateOf0 (weekNumber * 7 + i)
+            in
+            td [ title (format d)] [ d |> getDay |> String.fromInt |> text ]
     in
     tr []
-        [ th [] [ d |> String.fromInt |> text ]
-        , th [] [ d |> String.fromInt |> text ]
-        , th [] [ d |> String.fromInt |> text ]
-        , th [] [ d |> String.fromInt |> text ]
-        , th [] [ d |> String.fromInt |> text ]
-        , th [] [ d |> String.fromInt |> text ]
-        , th [] [ d |> String.fromInt |> text ]
-        ]
+        (List.map cellDate (List.range 0 7))
 
 viewWeeks : Int -> Html Msg
 viewWeeks year =

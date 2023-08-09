@@ -5207,7 +5207,6 @@ var $author$project$Date$Date = F3(
 	function (a, b, c) {
 		return {$: 'Date', a: a, b: b, c: c};
 	});
-var $elm$time$Time$Jan = {$: 'Jan'};
 var $elm$time$Time$flooredDiv = F2(
 	function (numerator, denominator) {
 		return $elm$core$Basics$floor(numerator / denominator);
@@ -5280,6 +5279,7 @@ var $elm$time$Time$Apr = {$: 'Apr'};
 var $elm$time$Time$Aug = {$: 'Aug'};
 var $elm$time$Time$Dec = {$: 'Dec'};
 var $elm$time$Time$Feb = {$: 'Feb'};
+var $elm$time$Time$Jan = {$: 'Jan'};
 var $elm$time$Time$Jul = {$: 'Jul'};
 var $elm$time$Time$Jun = {$: 'Jun'};
 var $elm$time$Time$Mar = {$: 'Mar'};
@@ -5396,6 +5396,7 @@ var $author$project$Date$addDay = F2(
 				(add * $author$project$Date$millisInDay) + $elm$time$Time$posixToMillis(
 					$author$project$Date$toPosix(d))));
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $elm$time$Time$Fri = {$: 'Fri'};
 var $elm$time$Time$Mon = {$: 'Mon'};
 var $elm$time$Time$Sat = {$: 'Sat'};
@@ -5432,9 +5433,12 @@ var $elm$time$Time$toWeekday = F2(
 var $author$project$Date$firstDateOfWeekZero = function (year) {
 	var janFirst = A3($author$project$Date$Date, year, $elm$time$Time$Jan, 1);
 	var dowJanFirst = A2(
-		$elm$time$Time$toWeekday,
-		$elm$time$Time$utc,
-		$author$project$Date$toPosix(janFirst));
+		$elm$core$Debug$log,
+		'>>>>',
+		A2(
+			$elm$time$Time$toWeekday,
+			$elm$time$Time$utc,
+			$author$project$Date$toPosix(janFirst)));
 	switch (dowJanFirst.$) {
 		case 'Mon':
 			return janFirst;
@@ -5443,85 +5447,87 @@ var $author$project$Date$firstDateOfWeekZero = function (year) {
 		case 'Wed':
 			return A2($author$project$Date$addDay, janFirst, -2);
 		case 'Thu':
-			return A2($author$project$Date$addDay, janFirst, -2);
+			return A2($author$project$Date$addDay, janFirst, -3);
 		case 'Fri':
-			return A2($author$project$Date$addDay, janFirst, -2);
+			return A2($author$project$Date$addDay, janFirst, -4);
 		case 'Sat':
-			return A2($author$project$Date$addDay, janFirst, -2);
+			return A2($author$project$Date$addDay, janFirst, -5);
 		default:
-			return A2($author$project$Date$addDay, janFirst, -2);
+			return A2($author$project$Date$addDay, janFirst, -6);
 	}
 };
-var $elm$html$Html$th = _VirtualDom_node('th');
+var $author$project$Date$format = function (_v0) {
+	var y = _v0.a;
+	var m = _v0.b;
+	var d = _v0.c;
+	switch (m.$) {
+		case 'Jan':
+			return $elm$core$String$fromInt(d) + (' January ' + $elm$core$String$fromInt(y));
+		case 'Feb':
+			return $elm$core$String$fromInt(d) + (' February' + $elm$core$String$fromInt(y));
+		case 'Mar':
+			return $elm$core$String$fromInt(d) + (' March' + $elm$core$String$fromInt(y));
+		case 'Apr':
+			return $elm$core$String$fromInt(d) + (' April' + $elm$core$String$fromInt(y));
+		case 'May':
+			return $elm$core$String$fromInt(d) + (' May' + $elm$core$String$fromInt(y));
+		case 'Jun':
+			return $elm$core$String$fromInt(d) + (' June' + $elm$core$String$fromInt(y));
+		case 'Jul':
+			return $elm$core$String$fromInt(d) + (' July' + $elm$core$String$fromInt(y));
+		case 'Aug':
+			return $elm$core$String$fromInt(d) + (' August' + $elm$core$String$fromInt(y));
+		case 'Sep':
+			return $elm$core$String$fromInt(d) + (' September' + $elm$core$String$fromInt(y));
+		case 'Oct':
+			return $elm$core$String$fromInt(d) + (' October' + $elm$core$String$fromInt(y));
+		case 'Nov':
+			return $elm$core$String$fromInt(d) + (' November' + $elm$core$String$fromInt(y));
+		default:
+			return $elm$core$String$fromInt(d) + (' December' + $elm$core$String$fromInt(y));
+	}
+};
+var $author$project$Date$getDay = function (_v0) {
+	var d = _v0.c;
+	return d;
+};
+var $elm$html$Html$td = _VirtualDom_node('td');
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $elm$html$Html$tr = _VirtualDom_node('tr');
 var $author$project$Main$viewWeek = F2(
 	function (year, weekNumber) {
-		var _v0 = $author$project$Date$firstDateOfWeekZero(year);
-		var y = _v0.a;
-		var m = _v0.b;
-		var d = _v0.c;
+		var firstDateOf0 = $author$project$Date$firstDateOfWeekZero(year);
+		var cellDate = function (i) {
+			var d = A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + i);
+			return A2(
+				$elm$html$Html$td,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$title(
+						$author$project$Date$format(d))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$elm$core$String$fromInt(
+							$author$project$Date$getDay(d)))
+					]));
+		};
 		return A2(
 			$elm$html$Html$tr,
 			_List_Nil,
-			_List_fromArray(
-				[
-					A2(
-					$elm$html$Html$th,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(d))
-						])),
-					A2(
-					$elm$html$Html$th,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(d))
-						])),
-					A2(
-					$elm$html$Html$th,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(d))
-						])),
-					A2(
-					$elm$html$Html$th,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(d))
-						])),
-					A2(
-					$elm$html$Html$th,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(d))
-						])),
-					A2(
-					$elm$html$Html$th,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(d))
-						])),
-					A2(
-					$elm$html$Html$th,
-					_List_Nil,
-					_List_fromArray(
-						[
-							$elm$html$Html$text(
-							$elm$core$String$fromInt(d))
-						]))
-				]));
+			A2(
+				$elm$core$List$map,
+				cellDate,
+				A2($elm$core$List$range, 0, 7)));
 	});
 var $author$project$Main$viewWeeks = function (year) {
 	return A2(
