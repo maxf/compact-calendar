@@ -4,7 +4,7 @@ import Browser
 import Html exposing (Html, button, div, text, table, tr, th, td)
 import Html.Events exposing (onClick)
 import Time exposing (Posix, Weekday(..), millisToPosix)
-import Date exposing (Date, dateForWeek)
+import Date exposing (Date(..), dateForWeek, firstDateOfWeekZero)
 
 
 -- MAIN
@@ -48,22 +48,25 @@ update msg model =
 
 -- we need to know the dow of the first of the year
 
-viewWeek : Int -> Html Msg
-viewWeek weekNumber =
+viewWeek : Int -> Int -> Html Msg
+viewWeek year weekNumber =
+    let
+        (Date y m d) = firstDateOfWeekZero year
+    in
     tr []
-        [ th [] [ (dateForWeek Mon weekNumber 2023) |> String.fromInt |> text ]
-        , th [] [ (dateForWeek Tue weekNumber 2023) |> String.fromInt |> text ]
-        , th [] [ (dateForWeek Wed weekNumber 2023) |> String.fromInt |> text ]
-        , th [] [ (dateForWeek Thu weekNumber 2023) |> String.fromInt |> text ]
-        , th [] [ (dateForWeek Fri weekNumber 2023) |> String.fromInt |> text ]
-        , th [] [ (dateForWeek Sat weekNumber 2023) |> String.fromInt |> text ]
-        , th [] [ (dateForWeek Sun weekNumber 2023) |> String.fromInt |> text ]
+        [ th [] [ d |> String.fromInt |> text ]
+        , th [] [ d |> String.fromInt |> text ]
+        , th [] [ d |> String.fromInt |> text ]
+        , th [] [ d |> String.fromInt |> text ]
+        , th [] [ d |> String.fromInt |> text ]
+        , th [] [ d |> String.fromInt |> text ]
+        , th [] [ d |> String.fromInt |> text ]
         ]
 
-viewWeeks : Html Msg
-viewWeeks =
+viewWeeks : Int -> Html Msg
+viewWeeks year =
     table []
-        ( List.map viewWeek (List.range 0 52) )
+    (List.map (viewWeek year) (List.range 0 52))
 
 view : Model -> Browser.Document Msg
 view model =
@@ -74,7 +77,7 @@ view model =
                   , div [] [ text (String.fromInt model) ]
                   , button [ onClick Increment ] [ text "+" ]
                   ]
-            , viewWeeks
+            , viewWeeks 2023
             ]
     in
         Browser.Document "Compact calendar" body

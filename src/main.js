@@ -5203,6 +5203,199 @@ var $elm$html$Html$Events$onClick = function (msg) {
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$table = _VirtualDom_node('table');
+var $author$project$Date$Date = F3(
+	function (a, b, c) {
+		return {$: 'Date', a: a, b: b, c: c};
+	});
+var $elm$time$Time$Jan = {$: 'Jan'};
+var $elm$time$Time$flooredDiv = F2(
+	function (numerator, denominator) {
+		return $elm$core$Basics$floor(numerator / denominator);
+	});
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
+var $elm$time$Time$toAdjustedMinutesHelp = F3(
+	function (defaultOffset, posixMinutes, eras) {
+		toAdjustedMinutesHelp:
+		while (true) {
+			if (!eras.b) {
+				return posixMinutes + defaultOffset;
+			} else {
+				var era = eras.a;
+				var olderEras = eras.b;
+				if (_Utils_cmp(era.start, posixMinutes) < 0) {
+					return posixMinutes + era.offset;
+				} else {
+					var $temp$defaultOffset = defaultOffset,
+						$temp$posixMinutes = posixMinutes,
+						$temp$eras = olderEras;
+					defaultOffset = $temp$defaultOffset;
+					posixMinutes = $temp$posixMinutes;
+					eras = $temp$eras;
+					continue toAdjustedMinutesHelp;
+				}
+			}
+		}
+	});
+var $elm$time$Time$toAdjustedMinutes = F2(
+	function (_v0, time) {
+		var defaultOffset = _v0.a;
+		var eras = _v0.b;
+		return A3(
+			$elm$time$Time$toAdjustedMinutesHelp,
+			defaultOffset,
+			A2(
+				$elm$time$Time$flooredDiv,
+				$elm$time$Time$posixToMillis(time),
+				60000),
+			eras);
+	});
+var $elm$core$Basics$ge = _Utils_ge;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$time$Time$toCivil = function (minutes) {
+	var rawDay = A2($elm$time$Time$flooredDiv, minutes, 60 * 24) + 719468;
+	var era = (((rawDay >= 0) ? rawDay : (rawDay - 146096)) / 146097) | 0;
+	var dayOfEra = rawDay - (era * 146097);
+	var yearOfEra = ((((dayOfEra - ((dayOfEra / 1460) | 0)) + ((dayOfEra / 36524) | 0)) - ((dayOfEra / 146096) | 0)) / 365) | 0;
+	var dayOfYear = dayOfEra - (((365 * yearOfEra) + ((yearOfEra / 4) | 0)) - ((yearOfEra / 100) | 0));
+	var mp = (((5 * dayOfYear) + 2) / 153) | 0;
+	var month = mp + ((mp < 10) ? 3 : (-9));
+	var year = yearOfEra + (era * 400);
+	return {
+		day: (dayOfYear - ((((153 * mp) + 2) / 5) | 0)) + 1,
+		month: month,
+		year: year + ((month <= 2) ? 1 : 0)
+	};
+};
+var $elm$time$Time$toDay = F2(
+	function (zone, time) {
+		return $elm$time$Time$toCivil(
+			A2($elm$time$Time$toAdjustedMinutes, zone, time)).day;
+	});
+var $elm$time$Time$Apr = {$: 'Apr'};
+var $elm$time$Time$Aug = {$: 'Aug'};
+var $elm$time$Time$Dec = {$: 'Dec'};
+var $elm$time$Time$Feb = {$: 'Feb'};
+var $elm$time$Time$Jul = {$: 'Jul'};
+var $elm$time$Time$Jun = {$: 'Jun'};
+var $elm$time$Time$Mar = {$: 'Mar'};
+var $elm$time$Time$May = {$: 'May'};
+var $elm$time$Time$Nov = {$: 'Nov'};
+var $elm$time$Time$Oct = {$: 'Oct'};
+var $elm$time$Time$Sep = {$: 'Sep'};
+var $elm$time$Time$toMonth = F2(
+	function (zone, time) {
+		var _v0 = $elm$time$Time$toCivil(
+			A2($elm$time$Time$toAdjustedMinutes, zone, time)).month;
+		switch (_v0) {
+			case 1:
+				return $elm$time$Time$Jan;
+			case 2:
+				return $elm$time$Time$Feb;
+			case 3:
+				return $elm$time$Time$Mar;
+			case 4:
+				return $elm$time$Time$Apr;
+			case 5:
+				return $elm$time$Time$May;
+			case 6:
+				return $elm$time$Time$Jun;
+			case 7:
+				return $elm$time$Time$Jul;
+			case 8:
+				return $elm$time$Time$Aug;
+			case 9:
+				return $elm$time$Time$Sep;
+			case 10:
+				return $elm$time$Time$Oct;
+			case 11:
+				return $elm$time$Time$Nov;
+			default:
+				return $elm$time$Time$Dec;
+		}
+	});
+var $elm$time$Time$toYear = F2(
+	function (zone, time) {
+		return $elm$time$Time$toCivil(
+			A2($elm$time$Time$toAdjustedMinutes, zone, time)).year;
+	});
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
+var $author$project$Date$fromPosix = function (posix) {
+	return A3(
+		$author$project$Date$Date,
+		A2($elm$time$Time$toYear, $elm$time$Time$utc, posix),
+		A2($elm$time$Time$toMonth, $elm$time$Time$utc, posix),
+		A2($elm$time$Time$toDay, $elm$time$Time$utc, posix));
+};
+var $author$project$Date$millisInDay = 86400000;
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $author$project$Date$countLeapYears = function (year) {
+	var max = ((year / 4) | 0) - 492;
+	var _false = ((year / 400) | 0) - 4;
+	var century = ((year / 100) | 0) - 19;
+	return max - (century - _false);
+};
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Date$isLeapYear = function (y) {
+	return ((!A2($elm$core$Basics$modBy, 4, y)) && (!(!A2($elm$core$Basics$modBy, 100, y)))) || (!A2($elm$core$Basics$modBy, 400, y));
+};
+var $author$project$Date$daysBeforeMonth = F2(
+	function (m, y) {
+		var addLeap = $author$project$Date$isLeapYear(y) ? 1 : 0;
+		switch (m.$) {
+			case 'Jan':
+				return 0;
+			case 'Feb':
+				return 31;
+			case 'Mar':
+				return 59 + addLeap;
+			case 'Apr':
+				return 90 + addLeap;
+			case 'May':
+				return 120 + addLeap;
+			case 'Jun':
+				return 151 + addLeap;
+			case 'Jul':
+				return 181 + addLeap;
+			case 'Aug':
+				return 212 + addLeap;
+			case 'Sep':
+				return 243 + addLeap;
+			case 'Oct':
+				return 273 + addLeap;
+			case 'Nov':
+				return 304 + addLeap;
+			default:
+				return 334 + addLeap;
+		}
+	});
+var $author$project$Date$toPosix = function (_v0) {
+	var y = _v0.a;
+	var m = _v0.b;
+	var d = _v0.c;
+	var days = (((y * 365) + $author$project$Date$countLeapYears(y - 1)) + A2($author$project$Date$daysBeforeMonth, m, y)) + (d - 1);
+	var epoch = (days - 719050) * $author$project$Date$millisInDay;
+	return $elm$time$Time$millisToPosix(epoch);
+};
+var $author$project$Date$addDay = F2(
+	function (d, add) {
+		return $author$project$Date$fromPosix(
+			$elm$time$Time$millisToPosix(
+				(add * $author$project$Date$millisInDay) + $elm$time$Time$posixToMillis(
+					$author$project$Date$toPosix(d))));
+	});
 var $elm$time$Time$Fri = {$: 'Fri'};
 var $elm$time$Time$Mon = {$: 'Mon'};
 var $elm$time$Time$Sat = {$: 'Sat'};
@@ -5210,90 +5403,135 @@ var $elm$time$Time$Sun = {$: 'Sun'};
 var $elm$time$Time$Thu = {$: 'Thu'};
 var $elm$time$Time$Tue = {$: 'Tue'};
 var $elm$time$Time$Wed = {$: 'Wed'};
-var $author$project$Date$dateForWeek = F3(
-	function (weekday, weekNumber, year) {
-		return 2;
+var $elm$time$Time$toWeekday = F2(
+	function (zone, time) {
+		var _v0 = A2(
+			$elm$core$Basics$modBy,
+			7,
+			A2(
+				$elm$time$Time$flooredDiv,
+				A2($elm$time$Time$toAdjustedMinutes, zone, time),
+				60 * 24));
+		switch (_v0) {
+			case 0:
+				return $elm$time$Time$Thu;
+			case 1:
+				return $elm$time$Time$Fri;
+			case 2:
+				return $elm$time$Time$Sat;
+			case 3:
+				return $elm$time$Time$Sun;
+			case 4:
+				return $elm$time$Time$Mon;
+			case 5:
+				return $elm$time$Time$Tue;
+			default:
+				return $elm$time$Time$Wed;
+		}
 	});
+var $author$project$Date$firstDateOfWeekZero = function (year) {
+	var janFirst = A3($author$project$Date$Date, year, $elm$time$Time$Jan, 1);
+	var dowJanFirst = A2(
+		$elm$time$Time$toWeekday,
+		$elm$time$Time$utc,
+		$author$project$Date$toPosix(janFirst));
+	switch (dowJanFirst.$) {
+		case 'Mon':
+			return janFirst;
+		case 'Tue':
+			return A2($author$project$Date$addDay, janFirst, -1);
+		case 'Wed':
+			return A2($author$project$Date$addDay, janFirst, -2);
+		case 'Thu':
+			return A2($author$project$Date$addDay, janFirst, -2);
+		case 'Fri':
+			return A2($author$project$Date$addDay, janFirst, -2);
+		case 'Sat':
+			return A2($author$project$Date$addDay, janFirst, -2);
+		default:
+			return A2($author$project$Date$addDay, janFirst, -2);
+	}
+};
 var $elm$html$Html$th = _VirtualDom_node('th');
 var $elm$html$Html$tr = _VirtualDom_node('tr');
-var $author$project$Main$viewWeek = function (weekNumber) {
+var $author$project$Main$viewWeek = F2(
+	function (year, weekNumber) {
+		var _v0 = $author$project$Date$firstDateOfWeekZero(year);
+		var y = _v0.a;
+		var m = _v0.b;
+		var d = _v0.c;
+		return A2(
+			$elm$html$Html$tr,
+			_List_Nil,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$th,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(d))
+						])),
+					A2(
+					$elm$html$Html$th,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(d))
+						])),
+					A2(
+					$elm$html$Html$th,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(d))
+						])),
+					A2(
+					$elm$html$Html$th,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(d))
+						])),
+					A2(
+					$elm$html$Html$th,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(d))
+						])),
+					A2(
+					$elm$html$Html$th,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(d))
+						])),
+					A2(
+					$elm$html$Html$th,
+					_List_Nil,
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(d))
+						]))
+				]));
+	});
+var $author$project$Main$viewWeeks = function (year) {
 	return A2(
-		$elm$html$Html$tr,
+		$elm$html$Html$table,
 		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$th,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(
-							A3($author$project$Date$dateForWeek, $elm$time$Time$Mon, weekNumber, 2023)))
-					])),
-				A2(
-				$elm$html$Html$th,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(
-							A3($author$project$Date$dateForWeek, $elm$time$Time$Tue, weekNumber, 2023)))
-					])),
-				A2(
-				$elm$html$Html$th,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(
-							A3($author$project$Date$dateForWeek, $elm$time$Time$Wed, weekNumber, 2023)))
-					])),
-				A2(
-				$elm$html$Html$th,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(
-							A3($author$project$Date$dateForWeek, $elm$time$Time$Thu, weekNumber, 2023)))
-					])),
-				A2(
-				$elm$html$Html$th,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(
-							A3($author$project$Date$dateForWeek, $elm$time$Time$Fri, weekNumber, 2023)))
-					])),
-				A2(
-				$elm$html$Html$th,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(
-							A3($author$project$Date$dateForWeek, $elm$time$Time$Sat, weekNumber, 2023)))
-					])),
-				A2(
-				$elm$html$Html$th,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$elm$html$Html$text(
-						$elm$core$String$fromInt(
-							A3($author$project$Date$dateForWeek, $elm$time$Time$Sun, weekNumber, 2023)))
-					]))
-			]));
+		A2(
+			$elm$core$List$map,
+			$author$project$Main$viewWeek(year),
+			A2($elm$core$List$range, 0, 52)));
 };
-var $author$project$Main$viewWeeks = A2(
-	$elm$html$Html$table,
-	_List_Nil,
-	A2(
-		$elm$core$List$map,
-		$author$project$Main$viewWeek,
-		A2($elm$core$List$range, 0, 52)));
 var $author$project$Main$view = function (model) {
 	var body = _List_fromArray(
 		[
@@ -5331,7 +5569,7 @@ var $author$project$Main$view = function (model) {
 							$elm$html$Html$text('+')
 						]))
 				])),
-			$author$project$Main$viewWeeks
+			$author$project$Main$viewWeeks(2023)
 		]);
 	return A2($elm$browser$Browser$Document, 'Compact calendar', body);
 };

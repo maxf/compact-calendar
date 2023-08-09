@@ -102,3 +102,30 @@ daysBeforeMonth m y =
 dateForWeek : Weekday -> Int -> Int -> Int
 dateForWeek weekday weekNumber year =
     2
+
+
+-- returns the day-of-week of the 1/1 of the year passed
+
+firstDateOfWeekZero: Int -> Date
+firstDateOfWeekZero year =
+    let
+        janFirst: Date
+        janFirst = Date year Jan 1
+        dowJanFirst: Weekday
+        dowJanFirst = janFirst |> toPosix |> toWeekday Time.utc
+    in
+    case dowJanFirst of
+        Mon ->
+            janFirst
+        Tue ->
+            addDay janFirst -1
+        Wed ->
+            addDay janFirst -2
+        Thu ->
+            addDay janFirst -2
+        Fri ->
+            addDay janFirst -2
+        Sat ->
+            addDay janFirst -2
+        Sun ->
+            addDay janFirst -2
