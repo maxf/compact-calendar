@@ -110,9 +110,8 @@ firstDateOfWeekZero: Int -> Date
 firstDateOfWeekZero year =
     let
         janFirst = Date year Jan 1
-        dowJanFirst = janFirst |> toPosix |> toWeekday Time.utc
     in
-    case dowJanFirst of
+    case getDow janFirst of
         Mon -> janFirst
         Tue -> addDay janFirst -1
         Wed -> addDay janFirst -2
@@ -121,21 +120,24 @@ firstDateOfWeekZero year =
         Sat -> addDay janFirst -5
         Sun -> addDay janFirst -6
 
+getDow: Date -> Weekday
+getDow date =
+    date |> toPosix |> toWeekday Time.utc
+
+
 format: Date -> String
 format (Date y m d) =
-    case m of
-        Jan -> (String.fromInt d) ++ " January " ++ (String.fromInt y)
-        Feb -> (String.fromInt d) ++ " February" ++ (String.fromInt y)
-        Mar -> (String.fromInt d) ++ " March" ++ (String.fromInt y)
-        Apr -> (String.fromInt d) ++ " April" ++ (String.fromInt y)
-        May -> (String.fromInt d) ++ " May" ++ (String.fromInt y)
-        Jun -> (String.fromInt d) ++ " June" ++ (String.fromInt y)
-        Jul -> (String.fromInt d) ++ " July" ++ (String.fromInt y)
-        Aug -> (String.fromInt d) ++ " August" ++ (String.fromInt y)
-        Sep -> (String.fromInt d) ++ " September" ++ (String.fromInt y)
-        Oct -> (String.fromInt d) ++ " October" ++ (String.fromInt y)
-        Nov -> (String.fromInt d) ++ " November" ++ (String.fromInt y)
-        Dec -> (String.fromInt d) ++ " December" ++ (String.fromInt y)
+    let
+        monthString = fromMonth m
+        weekdayString = getDow (Date y m d) |> fromWeekday
+    in
+        String.join " "
+            [ weekdayString
+            , String.fromInt d
+            , monthString
+            , String.fromInt y
+            ]
+
 
 getDay: Date -> Int
 getDay (Date _ _ d) =
@@ -173,3 +175,15 @@ fromMonth month =
         Oct -> "October"
         Nov -> "November"
         Dec -> "December"
+
+
+fromWeekday: Weekday -> String
+fromWeekday weekday =
+    case weekday of
+        Mon -> "Monday"
+        Tue -> "Tuesday"
+        Wed -> "Wednesday"
+        Thu -> "Thursday"
+        Fri -> "Friday"
+        Sat -> "Saturday"
+        Sun -> "Sunday"

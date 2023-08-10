@@ -6,14 +6,28 @@
   <script src="main.js"></script>
   <style>
     .oddMonth { background: #def }
+    .monthName {
+      background: #def;
+      text-align: left
+    }
+    .weekend { color: #ccc }
+    body {
+      font-family: sans-serif;
+    }
+    td {
+      text-align: center;
+      width: 1.5em;
+      height: 1.5em;
+    }
   </style>
 </head>
 <body>
   <div id="myapp"></div>
   <script>
+   var today = new Date();
    var app = Elm.Main.init({
      node: document.getElementById('myapp'),
-     flags: new Date().getFullYear()
+     flags: { date: today.getDate(), month: today.getMonth(), year: today.getFullYear() }
    });
   </script>
 </body>
