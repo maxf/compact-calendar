@@ -4,8 +4,8 @@ import Browser
 import Html exposing (Html, button, div, text, table, tr, th, td)
 import Html.Attributes exposing (title, class)
 import Html.Events exposing (onClick)
-import Time exposing (Posix, Weekday(..), millisToPosix)
-import Date exposing (Date(..), dateForWeek, firstDateOfWeekZero, addDay, fromMonth, format, getDay, getMonthNumber, getDow)
+import Time exposing (Posix, Weekday(..), millisToPosix, utc, toMillis)
+import Date exposing (Date(..), dateForWeek, firstDateOfWeekZero, addDay, fromMonth, format, getDay, getMonthNumber, getDow, getYear, monthFromNum, dateCompare, toPosix)
 
 
 -- MAIN
@@ -24,15 +24,12 @@ main =
 -- MODEL
 
 type alias Model =
-    { date: Int
-    , month: Int
-    , year: Int
-    }
+    { today: Date }
 
 
-init : { date: Int, month: Int, year: Int } -> (Model, Cmd Msg)
-init today =
-    (today, Cmd.none)
+init : { day: Int, month: Int, year: Int } -> (Model, Cmd Msg)
+init date =
+    ({ today = (Date date.year (monthFromNum date.month) date.day) }, Cmd.none)
 
 
 -- UPDATE
@@ -52,10 +49,9 @@ update msg model =
 
 -- VIEW
 
-viewCalendarCell: Date -> Html Msg
-viewCalendarCell date =
+viewCalendarCell: Date -> Date -> Html Msg
+viewCalendarCell today date =
     let
---        monthClass = if modBy 2 (getMonthNumber date) == 0 then "oddMonth" else "evenMonth"
         dow = getDow date
 
         firstDayOfMonthClass = if getDay date == 1 then "first-day" else ""
@@ -64,13 +60,22 @@ viewCalendarCell date =
 
         nextWeekDay = addDay date 7
 
+        dayIsPastClass =
+            if dateCompare today date > 0 then "past" else ""
+
         monthClass =
             if getDay nextWeekDay < getDay date then
                 "delimiterBottom"
             else
                 ""
 
-        cellClass = firstDayOfMonthClass ++ " " ++ dayClass ++ " " ++ monthClass
+        cellClass =
+            String.join " "
+                [ firstDayOfMonthClass
+                , dayClass
+                , monthClass
+                , dayIsPastClass
+                ]
 
 
     in
@@ -82,20 +87,20 @@ viewCalendarCell date =
 
 
 
-viewWeek : Int -> Int -> Html Msg
-viewWeek year weekNumber =
+viewWeek : Date -> Int -> Html Msg
+viewWeek today weekNumber =
     let
-        firstDateOf0 = firstDateOfWeekZero year
+        firstDateOf0 = firstDateOfWeekZero (getYear today)
 
         firstDateOfWeek = addDay firstDateOf0 (weekNumber * 7)
 
         lastDateOfWeek = addDay firstDateOf0 (weekNumber * 7 + 6)
 
-        (Date _ m _) = lastDateOfWeek
+        ( Date _ m _ ) = lastDateOfWeek
 
         cellHtml: Int -> Html Msg
         cellHtml i =
-            viewCalendarCell (addDay firstDateOf0 (weekNumber * 7 + i))
+            viewCalendarCell today (addDay firstDateOf0 (weekNumber * 7 + i))
 
         diffDays =
             (getDay lastDateOfWeek) - (getDay firstDateOfWeek)
@@ -120,8 +125,8 @@ viewWeek year weekNumber =
         )
 
 
-viewYear : Int -> Html Msg
-viewYear year =
+viewYear : Date -> Html Msg
+viewYear today =
     table []
         (List.append
              [ tr []
@@ -135,13 +140,13 @@ viewYear year =
                    , th [] [ text "S" ]
                    ]
              ]
-             (List.map (viewWeek year) (List.range 0 52))
+             (List.map (viewWeek today) (List.range 0 52))
         )
 
 
 view : Model -> Browser.Document Msg
 view model =
     let
-        body = [ viewYear model.year ]
+        body = [ viewYear model.today ]
     in
         Browser.Document "Compact calendar" body

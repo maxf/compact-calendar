@@ -8,7 +8,7 @@ millisInDay = 86400000
 
 dateCompare: Date -> Date -> Int
 dateCompare a b =
-    (toMillis utc (toPosix a)) - (toMillis utc (toPosix b))
+    (posixToMillis (toPosix a)) - (posixToMillis (toPosix b))
 
 addDay: Date -> Int -> Date
 addDay d add =
@@ -139,9 +139,24 @@ format (Date y m d) =
             ]
 
 
-getDay: Date -> Int
-getDay (Date _ _ d) =
-    d
+getDay (Date _ _ d) = d
+
+getYear (Date y _ _) = y
+
+monthFromNum n =
+    case n of
+        0 -> Jan
+        1 -> Feb
+        2 -> Mar
+        3 -> Apr
+        4 -> May
+        5 -> Jun
+        6 -> Jul
+        7 -> Aug
+        8 -> Sep
+        9 -> Oct
+        10 -> Nov
+        _ -> Dec
 
 getMonthNumber: Date -> Int
 getMonthNumber (Date y m d) =

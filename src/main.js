@@ -5161,10 +5161,62 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$document = _Browser_document;
 var $elm$json$Json$Decode$field = _Json_decodeField;
+var $author$project$Date$Date = F3(
+	function (a, b, c) {
+		return {$: 'Date', a: a, b: b, c: c};
+	});
+var $elm$time$Time$Apr = {$: 'Apr'};
+var $elm$time$Time$Aug = {$: 'Aug'};
+var $elm$time$Time$Dec = {$: 'Dec'};
+var $elm$time$Time$Feb = {$: 'Feb'};
+var $elm$time$Time$Jan = {$: 'Jan'};
+var $elm$time$Time$Jul = {$: 'Jul'};
+var $elm$time$Time$Jun = {$: 'Jun'};
+var $elm$time$Time$Mar = {$: 'Mar'};
+var $elm$time$Time$May = {$: 'May'};
+var $elm$time$Time$Nov = {$: 'Nov'};
+var $elm$time$Time$Oct = {$: 'Oct'};
+var $elm$time$Time$Sep = {$: 'Sep'};
+var $author$project$Date$monthFromNum = function (n) {
+	switch (n) {
+		case 0:
+			return $elm$time$Time$Jan;
+		case 1:
+			return $elm$time$Time$Feb;
+		case 2:
+			return $elm$time$Time$Mar;
+		case 3:
+			return $elm$time$Time$Apr;
+		case 4:
+			return $elm$time$Time$May;
+		case 5:
+			return $elm$time$Time$Jun;
+		case 6:
+			return $elm$time$Time$Jul;
+		case 7:
+			return $elm$time$Time$Aug;
+		case 8:
+			return $elm$time$Time$Sep;
+		case 9:
+			return $elm$time$Time$Oct;
+		case 10:
+			return $elm$time$Time$Nov;
+		default:
+			return $elm$time$Time$Dec;
+	}
+};
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$init = function (today) {
-	return _Utils_Tuple2(today, $elm$core$Platform$Cmd$none);
+var $author$project$Main$init = function (date) {
+	return _Utils_Tuple2(
+		{
+			today: A3(
+				$author$project$Date$Date,
+				date.year,
+				$author$project$Date$monthFromNum(date.month),
+				date.day)
+		},
+		$elm$core$Platform$Cmd$none);
 };
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
@@ -5194,10 +5246,6 @@ var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$th = _VirtualDom_node('th');
 var $elm$html$Html$tr = _VirtualDom_node('tr');
-var $author$project$Date$Date = F3(
-	function (a, b, c) {
-		return {$: 'Date', a: a, b: b, c: c};
-	});
 var $elm$time$Time$flooredDiv = F2(
 	function (numerator, denominator) {
 		return $elm$core$Basics$floor(numerator / denominator);
@@ -5266,18 +5314,6 @@ var $elm$time$Time$toDay = F2(
 		return $elm$time$Time$toCivil(
 			A2($elm$time$Time$toAdjustedMinutes, zone, time)).day;
 	});
-var $elm$time$Time$Apr = {$: 'Apr'};
-var $elm$time$Time$Aug = {$: 'Aug'};
-var $elm$time$Time$Dec = {$: 'Dec'};
-var $elm$time$Time$Feb = {$: 'Feb'};
-var $elm$time$Time$Jan = {$: 'Jan'};
-var $elm$time$Time$Jul = {$: 'Jul'};
-var $elm$time$Time$Jun = {$: 'Jun'};
-var $elm$time$Time$Mar = {$: 'Mar'};
-var $elm$time$Time$May = {$: 'May'};
-var $elm$time$Time$Nov = {$: 'Nov'};
-var $elm$time$Time$Oct = {$: 'Oct'};
-var $elm$time$Time$Sep = {$: 'Sep'};
 var $elm$time$Time$toMonth = F2(
 	function (zone, time) {
 		var _v0 = $elm$time$Time$toCivil(
@@ -5487,7 +5523,17 @@ var $author$project$Date$getDay = function (_v0) {
 	var d = _v0.c;
 	return d;
 };
+var $author$project$Date$getYear = function (_v0) {
+	var y = _v0.a;
+	return y;
+};
 var $elm$html$Html$td = _VirtualDom_node('td');
+var $author$project$Date$dateCompare = F2(
+	function (a, b) {
+		return $elm$time$Time$posixToMillis(
+			$author$project$Date$toPosix(a)) - $elm$time$Time$posixToMillis(
+			$author$project$Date$toPosix(b));
+	});
 var $author$project$Date$fromWeekday = function (weekday) {
 	switch (weekday.$) {
 		case 'Mon':
@@ -5526,33 +5572,40 @@ var $author$project$Date$format = function (_v0) {
 			]));
 };
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
-var $author$project$Main$viewCalendarCell = function (date) {
-	var nextWeekDay = A2($author$project$Date$addDay, date, 7);
-	var monthClass = (_Utils_cmp(
-		$author$project$Date$getDay(nextWeekDay),
-		$author$project$Date$getDay(date)) < 0) ? 'delimiterBottom' : '';
-	var firstDayOfMonthClass = ($author$project$Date$getDay(date) === 1) ? 'first-day' : '';
-	var dow = $author$project$Date$getDow(date);
-	var dayClass = (_Utils_eq(dow, $elm$time$Time$Sat) || _Utils_eq(dow, $elm$time$Time$Sun)) ? 'weekend' : '';
-	var cellClass = firstDayOfMonthClass + (' ' + (dayClass + (' ' + monthClass)));
-	return A2(
-		$elm$html$Html$td,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$title(
-				$author$project$Date$format(date)),
-				$elm$html$Html$Attributes$class(cellClass)
-			]),
-		_List_fromArray(
-			[
-				$elm$html$Html$text(
-				$elm$core$String$fromInt(
-					$author$project$Date$getDay(date)))
-			]));
-};
+var $author$project$Main$viewCalendarCell = F2(
+	function (today, date) {
+		var nextWeekDay = A2($author$project$Date$addDay, date, 7);
+		var monthClass = (_Utils_cmp(
+			$author$project$Date$getDay(nextWeekDay),
+			$author$project$Date$getDay(date)) < 0) ? 'delimiterBottom' : '';
+		var firstDayOfMonthClass = ($author$project$Date$getDay(date) === 1) ? 'first-day' : '';
+		var dow = $author$project$Date$getDow(date);
+		var dayIsPastClass = (A2($author$project$Date$dateCompare, today, date) > 0) ? 'past' : '';
+		var dayClass = (_Utils_eq(dow, $elm$time$Time$Sat) || _Utils_eq(dow, $elm$time$Time$Sun)) ? 'weekend' : '';
+		var cellClass = A2(
+			$elm$core$String$join,
+			' ',
+			_List_fromArray(
+				[firstDayOfMonthClass, dayClass, monthClass, dayIsPastClass]));
+		return A2(
+			$elm$html$Html$td,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$title(
+					$author$project$Date$format(date)),
+					$elm$html$Html$Attributes$class(cellClass)
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(
+					$elm$core$String$fromInt(
+						$author$project$Date$getDay(date)))
+				]));
+	});
 var $author$project$Main$viewWeek = F2(
-	function (year, weekNumber) {
-		var firstDateOf0 = $author$project$Date$firstDateOfWeekZero(year);
+	function (today, weekNumber) {
+		var firstDateOf0 = $author$project$Date$firstDateOfWeekZero(
+			$author$project$Date$getYear(today));
 		var firstDateOfWeek = A2($author$project$Date$addDay, firstDateOf0, weekNumber * 7);
 		var lastDateOfWeek = A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + 6);
 		var diffDays = $author$project$Date$getDay(lastDateOfWeek) - $author$project$Date$getDay(firstDateOfWeek);
@@ -5561,7 +5614,9 @@ var $author$project$Main$viewWeek = F2(
 				$elm$html$Html$Attributes$class('monthName')
 			]) : _List_Nil;
 		var cellHtml = function (i) {
-			return $author$project$Main$viewCalendarCell(
+			return A2(
+				$author$project$Main$viewCalendarCell,
+				today,
 				A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + i));
 		};
 		var _v0 = lastDateOfWeek;
@@ -5585,7 +5640,7 @@ var $author$project$Main$viewWeek = F2(
 					cellHtml,
 					A2($elm$core$List$range, 0, 6))));
 	});
-var $author$project$Main$viewYear = function (year) {
+var $author$project$Main$viewYear = function (today) {
 	return A2(
 		$elm$html$Html$table,
 		_List_Nil,
@@ -5658,13 +5713,13 @@ var $author$project$Main$viewYear = function (year) {
 				]),
 			A2(
 				$elm$core$List$map,
-				$author$project$Main$viewWeek(year),
+				$author$project$Main$viewWeek(today),
 				A2($elm$core$List$range, 0, 52))));
 };
 var $author$project$Main$view = function (model) {
 	var body = _List_fromArray(
 		[
-			$author$project$Main$viewYear(model.year)
+			$author$project$Main$viewYear(model.today)
 		]);
 	return A2($elm$browser$Browser$Document, 'Compact calendar', body);
 };
@@ -5686,11 +5741,11 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 				function (month) {
 					return A2(
 						$elm$json$Json$Decode$andThen,
-						function (date) {
+						function (day) {
 							return $elm$json$Json$Decode$succeed(
-								{date: date, month: month, year: year});
+								{day: day, month: month, year: year});
 						},
-						A2($elm$json$Json$Decode$field, 'date', $elm$json$Json$Decode$int));
+						A2($elm$json$Json$Decode$field, 'day', $elm$json$Json$Decode$int));
 				},
 				A2($elm$json$Json$Decode$field, 'month', $elm$json$Json$Decode$int));
 		},

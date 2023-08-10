@@ -13,6 +13,10 @@
       background: #cdf;
       text-align: left
     }
+    .past {
+      color: #999;
+      background: #e9e9e9
+    }
     .weekend { color: #ccc }
     body {
       font-family: sans-serif;
@@ -33,7 +37,7 @@
    var today = new Date();
    var app = Elm.Main.init({
      node: document.getElementById('myapp'),
-     flags: { date: today.getDate(), month: today.getMonth(), year: today.getFullYear() }
+     flags: { day: today.getDate(), month: today.getMonth(), year: today.getFullYear() }
    });
   </script>
 </body>
