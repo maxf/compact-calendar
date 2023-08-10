@@ -5525,46 +5525,16 @@ var $author$project$Date$format = function (_v0) {
 				$elm$core$String$fromInt(y)
 			]));
 };
-var $author$project$Date$getMonthNumber = function (_v0) {
-	var y = _v0.a;
-	var m = _v0.b;
-	var d = _v0.c;
-	switch (m.$) {
-		case 'Jan':
-			return 1;
-		case 'Feb':
-			return 2;
-		case 'Mar':
-			return 3;
-		case 'Apr':
-			return 4;
-		case 'May':
-			return 5;
-		case 'Jun':
-			return 6;
-		case 'Jul':
-			return 7;
-		case 'Aug':
-			return 8;
-		case 'Sep':
-			return 9;
-		case 'Oct':
-			return 10;
-		case 'Nov':
-			return 11;
-		default:
-			return 12;
-	}
-};
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $author$project$Main$viewCalendarCell = function (date) {
-	var monthClass = (!A2(
-		$elm$core$Basics$modBy,
-		2,
-		$author$project$Date$getMonthNumber(date))) ? 'oddMonth' : 'evenMonth';
+	var nextWeekDay = A2($author$project$Date$addDay, date, 7);
+	var monthClass = (_Utils_cmp(
+		$author$project$Date$getDay(nextWeekDay),
+		$author$project$Date$getDay(date)) < 0) ? 'delimiterBottom' : '';
+	var firstDayOfMonthClass = ($author$project$Date$getDay(date) === 1) ? 'first-day' : '';
 	var dow = $author$project$Date$getDow(date);
 	var dayClass = (_Utils_eq(dow, $elm$time$Time$Sat) || _Utils_eq(dow, $elm$time$Time$Sun)) ? 'weekend' : '';
-	var cellClass = monthClass + (' ' + dayClass);
+	var cellClass = firstDayOfMonthClass + (' ' + (dayClass + (' ' + monthClass)));
 	return A2(
 		$elm$html$Html$td,
 		_List_fromArray(

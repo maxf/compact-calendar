@@ -55,10 +55,24 @@ update msg model =
 viewCalendarCell: Date -> Html Msg
 viewCalendarCell date =
     let
-        monthClass = if modBy 2 (getMonthNumber date) == 0 then "oddMonth" else "evenMonth"
+--        monthClass = if modBy 2 (getMonthNumber date) == 0 then "oddMonth" else "evenMonth"
         dow = getDow date
+
+        firstDayOfMonthClass = if getDay date == 1 then "first-day" else ""
+
         dayClass = if dow == Sat || dow == Sun then "weekend" else ""
-        cellClass = monthClass ++ " " ++ dayClass
+
+        nextWeekDay = addDay date 7
+
+        monthClass =
+            if getDay nextWeekDay < getDay date then
+                "delimiterBottom"
+            else
+                ""
+
+        cellClass = firstDayOfMonthClass ++ " " ++ dayClass ++ " " ++ monthClass
+
+
     in
     td
         [ title (format date)
@@ -72,19 +86,26 @@ viewWeek : Int -> Int -> Html Msg
 viewWeek year weekNumber =
     let
         firstDateOf0 = firstDateOfWeekZero year
+
         firstDateOfWeek = addDay firstDateOf0 (weekNumber * 7)
+
         lastDateOfWeek = addDay firstDateOf0 (weekNumber * 7 + 6)
+
         (Date _ m _) = lastDateOfWeek
+
         cellHtml: Int -> Html Msg
         cellHtml i =
             viewCalendarCell (addDay firstDateOf0 (weekNumber * 7 + i))
+
         diffDays =
             (getDay lastDateOfWeek) - (getDay firstDateOfWeek)
+
         monthColContent =
             if diffDays < 0 || (getDay firstDateOfWeek) == 1 then
                 [ m |> fromMonth |> text ]
             else
                 [ ]
+
         monthColAttribs =
             if diffDays < 0 || (getDay firstDateOfWeek) == 1 then
                 [ class "monthName" ]
