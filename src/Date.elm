@@ -10,6 +10,7 @@ dateCompare: Date -> Date -> Int
 dateCompare a b =
     (posixToMillis (toPosix a)) - (posixToMillis (toPosix b))
 
+
 addDay: Date -> Int -> Date
 addDay d add =
     d
@@ -137,6 +138,14 @@ format (Date y m d) =
             , monthString
             , String.fromInt y
             ]
+
+formatShort: Date -> String
+formatShort (Date y m d) =
+    String.join "/"
+        [ String.fromInt d
+        , getMonthNumber (Date y m d) |> String.fromInt
+        , String.fromInt y
+        ]
 
 
 getDay (Date _ _ d) = d

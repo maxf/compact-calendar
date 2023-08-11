@@ -5166,6 +5166,7 @@ var $author$project$Date$Date = F3(
 	function (a, b, c) {
 		return {$: 'Date', a: a, b: b, c: c};
 	});
+var $elm$time$Time$Sep = {$: 'Sep'};
 var $elm$time$Time$Apr = {$: 'Apr'};
 var $elm$time$Time$Dec = {$: 'Dec'};
 var $elm$time$Time$Feb = {$: 'Feb'};
@@ -5176,7 +5177,6 @@ var $elm$time$Time$Mar = {$: 'Mar'};
 var $elm$time$Time$May = {$: 'May'};
 var $elm$time$Time$Nov = {$: 'Nov'};
 var $elm$time$Time$Oct = {$: 'Oct'};
-var $elm$time$Time$Sep = {$: 'Sep'};
 var $author$project$Date$monthFromNum = function (n) {
 	switch (n) {
 		case 0:
@@ -5214,7 +5214,17 @@ var $author$project$Main$init = function (date) {
 				{
 				durationInDays: 1,
 				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Aug, 15),
-				title: 'test'
+				title: 'event1'
+			},
+				{
+				durationInDays: 1,
+				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Aug, 16),
+				title: 'event1.5'
+			},
+				{
+				durationInDays: 1,
+				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Sep, 1),
+				title: 'event2'
 			}
 			]),
 		today: A3(
@@ -5256,19 +5266,161 @@ var $elm$browser$Browser$Document = F2(
 	function (title, body) {
 		return {body: body, title: title};
 	});
-var $elm$html$Html$table = _VirtualDom_node('table');
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
+var $author$project$Date$countLeapYears = function (year) {
+	var max = ((year / 4) | 0) - 492;
+	var _false = ((year / 400) | 0) - 4;
+	var century = ((year / 100) | 0) - 19;
+	return max - (century - _false);
+};
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Date$isLeapYear = function (y) {
+	return ((!A2($elm$core$Basics$modBy, 4, y)) && (!(!A2($elm$core$Basics$modBy, 100, y)))) || (!A2($elm$core$Basics$modBy, 400, y));
+};
+var $author$project$Date$daysBeforeMonth = F2(
+	function (m, y) {
+		var addLeap = $author$project$Date$isLeapYear(y) ? 1 : 0;
+		switch (m.$) {
+			case 'Jan':
+				return 0;
+			case 'Feb':
+				return 31;
+			case 'Mar':
+				return 59 + addLeap;
+			case 'Apr':
+				return 90 + addLeap;
+			case 'May':
+				return 120 + addLeap;
+			case 'Jun':
+				return 151 + addLeap;
+			case 'Jul':
+				return 181 + addLeap;
+			case 'Aug':
+				return 212 + addLeap;
+			case 'Sep':
+				return 243 + addLeap;
+			case 'Oct':
+				return 273 + addLeap;
+			case 'Nov':
+				return 304 + addLeap;
+			default:
+				return 334 + addLeap;
+		}
+	});
+var $author$project$Date$millisInDay = 86400000;
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $author$project$Date$toPosix = function (_v0) {
+	var y = _v0.a;
+	var m = _v0.b;
+	var d = _v0.c;
+	var days = (((y * 365) + $author$project$Date$countLeapYears(y - 1)) + A2($author$project$Date$daysBeforeMonth, m, y)) + (d - 1);
+	var epoch = (days - 719050) * $author$project$Date$millisInDay;
+	return $elm$time$Time$millisToPosix(epoch);
+};
+var $author$project$Date$dateCompare = F2(
+	function (a, b) {
+		return $elm$time$Time$posixToMillis(
+			$author$project$Date$toPosix(a)) - $elm$time$Time$posixToMillis(
+			$author$project$Date$toPosix(b));
+	});
+var $author$project$Main$eventSortCompare = F2(
+	function (a, b) {
+		var diff = A2($author$project$Date$dateCompare, a.start, b.start);
+		return (diff < 0) ? $elm$core$Basics$LT : ((!diff) ? $elm$core$Basics$EQ : $elm$core$Basics$GT);
+	});
+var $elm$core$List$sortWith = _List_sortWith;
+var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Date$getMonthNumber = function (_v0) {
+	var y = _v0.a;
+	var m = _v0.b;
+	var d = _v0.c;
+	switch (m.$) {
+		case 'Jan':
+			return 1;
+		case 'Feb':
+			return 2;
+		case 'Mar':
+			return 3;
+		case 'Apr':
+			return 4;
+		case 'May':
+			return 5;
+		case 'Jun':
+			return 6;
+		case 'Jul':
+			return 7;
+		case 'Aug':
+			return 8;
+		case 'Sep':
+			return 9;
+		case 'Oct':
+			return 10;
+		case 'Nov':
+			return 11;
+		default:
+			return 12;
+	}
+};
+var $author$project$Date$formatShort = function (_v0) {
+	var y = _v0.a;
+	var m = _v0.b;
+	var d = _v0.c;
+	return A2(
+		$elm$core$String$join,
+		'/',
+		_List_fromArray(
+			[
+				$elm$core$String$fromInt(d),
+				$elm$core$String$fromInt(
+				$author$project$Date$getMonthNumber(
+					A3($author$project$Date$Date, y, m, d))),
+				$elm$core$String$fromInt(y)
+			]));
+};
+var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $author$project$Main$viewEvent = function (event) {
+	return A2(
+		$elm$html$Html$li,
+		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$text(
+				$author$project$Date$formatShort(event.start) + (': ' + event.title))
+			]));
+};
+var $author$project$Main$viewEvents = function (model) {
+	var sortedEvents = A2($elm$core$List$sortWith, $author$project$Main$eventSortCompare, model.events);
+	return A2(
+		$elm$html$Html$ul,
+		_List_Nil,
+		A2($elm$core$List$map, $author$project$Main$viewEvent, sortedEvents));
+};
+var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$html$Html$th = _VirtualDom_node('th');
 var $elm$html$Html$tr = _VirtualDom_node('tr');
 var $elm$time$Time$flooredDiv = F2(
 	function (numerator, denominator) {
 		return $elm$core$Basics$floor(numerator / denominator);
 	});
-var $elm$time$Time$posixToMillis = function (_v0) {
-	var millis = _v0.a;
-	return millis;
-};
 var $elm$time$Time$toAdjustedMinutesHelp = F3(
 	function (defaultOffset, posixMinutes, eras) {
 		toAdjustedMinutesHelp:
@@ -5377,60 +5529,6 @@ var $author$project$Date$fromPosix = function (posix) {
 		A2($elm$time$Time$toMonth, $elm$time$Time$utc, posix),
 		A2($elm$time$Time$toDay, $elm$time$Time$utc, posix));
 };
-var $author$project$Date$millisInDay = 86400000;
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
-var $author$project$Date$countLeapYears = function (year) {
-	var max = ((year / 4) | 0) - 492;
-	var _false = ((year / 400) | 0) - 4;
-	var century = ((year / 100) | 0) - 19;
-	return max - (century - _false);
-};
-var $elm$core$Basics$modBy = _Basics_modBy;
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Date$isLeapYear = function (y) {
-	return ((!A2($elm$core$Basics$modBy, 4, y)) && (!(!A2($elm$core$Basics$modBy, 100, y)))) || (!A2($elm$core$Basics$modBy, 400, y));
-};
-var $author$project$Date$daysBeforeMonth = F2(
-	function (m, y) {
-		var addLeap = $author$project$Date$isLeapYear(y) ? 1 : 0;
-		switch (m.$) {
-			case 'Jan':
-				return 0;
-			case 'Feb':
-				return 31;
-			case 'Mar':
-				return 59 + addLeap;
-			case 'Apr':
-				return 90 + addLeap;
-			case 'May':
-				return 120 + addLeap;
-			case 'Jun':
-				return 151 + addLeap;
-			case 'Jul':
-				return 181 + addLeap;
-			case 'Aug':
-				return 212 + addLeap;
-			case 'Sep':
-				return 243 + addLeap;
-			case 'Oct':
-				return 273 + addLeap;
-			case 'Nov':
-				return 304 + addLeap;
-			default:
-				return 334 + addLeap;
-		}
-	});
-var $author$project$Date$toPosix = function (_v0) {
-	var y = _v0.a;
-	var m = _v0.b;
-	var d = _v0.c;
-	var days = (((y * 365) + $author$project$Date$countLeapYears(y - 1)) + A2($author$project$Date$daysBeforeMonth, m, y)) + (d - 1);
-	var epoch = (days - 719050) * $author$project$Date$millisInDay;
-	return $elm$time$Time$millisToPosix(epoch);
-};
 var $author$project$Date$addDay = F2(
 	function (d, add) {
 		return $author$project$Date$fromPosix(
@@ -5438,24 +5536,9 @@ var $author$project$Date$addDay = F2(
 				(add * $author$project$Date$millisInDay) + $elm$time$Time$posixToMillis(
 					$author$project$Date$toPosix(d))));
 	});
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
 var $elm$core$List$concat = function (lists) {
 	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
-var $author$project$Date$dateCompare = F2(
-	function (a, b) {
-		return $elm$time$Time$posixToMillis(
-			$author$project$Date$toPosix(a)) - $elm$time$Time$posixToMillis(
-			$author$project$Date$toPosix(b));
-	});
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -5622,14 +5705,21 @@ var $elm$html$Html$Events$onClick = function (msg) {
 };
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $author$project$Main$viewCalendarCell = F2(
-	function (today, date) {
+	function (model, date) {
 		var nextWeekDay = A2($author$project$Date$addDay, date, 7);
 		var monthClass = (_Utils_cmp(
 			$author$project$Date$getDay(nextWeekDay),
 			$author$project$Date$getDay(date)) < 0) ? 'delimiterBottom' : '';
 		var firstDayOfMonthClass = ($author$project$Date$getDay(date) === 1) ? 'first-day' : '';
+		var eventsOnThisDaysClass = ($elm$core$List$length(
+			A2(
+				$elm$core$List$filter,
+				function (e) {
+					return _Utils_eq(e.start, date);
+				},
+				model.events)) > 0) ? 'events' : '';
 		var dow = $author$project$Date$getDow(date);
-		var dayIsPastClass = (A2($author$project$Date$dateCompare, today, date) > 0) ? 'past' : '';
+		var dayIsPastClass = (A2($author$project$Date$dateCompare, model.today, date) > 0) ? 'past' : '';
 		var dayClass = (_Utils_eq(dow, $elm$time$Time$Sat) || _Utils_eq(dow, $elm$time$Time$Sun)) ? 'weekend' : '';
 		var cellClass = A2(
 			$elm$core$String$join,
@@ -5648,9 +5738,18 @@ var $author$project$Main$viewCalendarCell = F2(
 				]),
 			_List_fromArray(
 				[
-					$elm$html$Html$text(
-					$elm$core$String$fromInt(
-						$author$project$Date$getDay(date)))
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class(eventsOnThisDaysClass)
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$elm$core$String$fromInt(
+								$author$project$Date$getDay(date)))
+						]))
 				]));
 	});
 var $author$project$Main$viewWeek = F2(
@@ -5671,7 +5770,7 @@ var $author$project$Main$viewWeek = F2(
 		var cellHtml = function (i) {
 			return A2(
 				$author$project$Main$viewCalendarCell,
-				model.today,
+				model,
 				A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + i));
 		};
 		var _v0 = lastDateOfWeek;
@@ -5703,7 +5802,8 @@ var $author$project$Main$viewWeek = F2(
 							_List_fromArray(
 								[
 									$elm$html$Html$text(
-									($elm$core$List$length(listOfEventsForThisWeek) > 0) ? 'OK' : '')
+									($elm$core$List$length(listOfEventsForThisWeek) > 0) ? $elm$core$String$fromInt(
+										$elm$core$List$length(listOfEventsForThisWeek)) : '')
 								]))
 						])
 					])));
@@ -5787,7 +5887,17 @@ var $author$project$Main$viewYear = function (model) {
 var $author$project$Main$view = function (model) {
 	var body = _List_fromArray(
 		[
-			$author$project$Main$viewYear(model)
+			A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('columns')
+				]),
+			_List_fromArray(
+				[
+					$author$project$Main$viewYear(model),
+					$author$project$Main$viewEvents(model)
+				]))
 		]);
 	return A2($elm$browser$Browser$Document, 'Compact calendar', body);
 };
