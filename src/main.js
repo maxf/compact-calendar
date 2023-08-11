@@ -5161,12 +5161,12 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$document = _Browser_document;
 var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$time$Time$Aug = {$: 'Aug'};
 var $author$project$Date$Date = F3(
 	function (a, b, c) {
 		return {$: 'Date', a: a, b: b, c: c};
 	});
 var $elm$time$Time$Apr = {$: 'Apr'};
-var $elm$time$Time$Aug = {$: 'Aug'};
 var $elm$time$Time$Dec = {$: 'Dec'};
 var $elm$time$Time$Feb = {$: 'Feb'};
 var $elm$time$Time$Jan = {$: 'Jan'};
@@ -5208,31 +5208,26 @@ var $author$project$Date$monthFromNum = function (n) {
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (date) {
-	return _Utils_Tuple2(
-		{
-			today: A3(
-				$author$project$Date$Date,
-				date.year,
-				$author$project$Date$monthFromNum(date.month),
-				date.day)
-		},
-		$elm$core$Platform$Cmd$none);
+	var initialModel = {
+		events: _List_fromArray(
+			[
+				{
+				durationInDays: 1,
+				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Aug, 15),
+				title: 'test'
+			}
+			]),
+		today: A3(
+			$author$project$Date$Date,
+			date.year,
+			$author$project$Date$monthFromNum(date.month),
+			date.day)
+	};
+	return _Utils_Tuple2(initialModel, $elm$core$Platform$Cmd$none);
 };
 var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Main$update = F2(
-	function (msg, model) {
-		if (msg.$ === 'Increment') {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-		} else {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-		}
-	});
-var $elm$browser$Browser$Document = F2(
-	function (title, body) {
-		return {body: body, title: title};
-	});
 var $elm$core$List$append = F2(
 	function (xs, ys) {
 		if (!ys.b) {
@@ -5240,6 +5235,26 @@ var $elm$core$List$append = F2(
 		} else {
 			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
 		}
+	});
+var $author$project$Main$update = F2(
+	function (msg, model) {
+		var date = msg.a;
+		var newEvent = {durationInDays: 1, start: date, title: 'new event'};
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					events: A2(
+						$elm$core$List$append,
+						_List_fromArray(
+							[newEvent]),
+						model.events)
+				}),
+			$elm$core$Platform$Cmd$none);
+	});
+var $elm$browser$Browser$Document = F2(
+	function (title, body) {
+		return {body: body, title: title};
 	});
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
@@ -5432,6 +5447,26 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			$elm$json$Json$Encode$string(string));
 	});
 var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$core$List$concat = function (lists) {
+	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
+};
+var $author$project$Date$dateCompare = F2(
+	function (a, b) {
+		return $elm$time$Time$posixToMillis(
+			$author$project$Date$toPosix(a)) - $elm$time$Time$posixToMillis(
+			$author$project$Date$toPosix(b));
+	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
 var $elm$time$Time$Fri = {$: 'Fri'};
 var $elm$time$Time$Mon = {$: 'Mon'};
 var $elm$time$Time$Sat = {$: 'Sat'};
@@ -5528,12 +5563,9 @@ var $author$project$Date$getYear = function (_v0) {
 	return y;
 };
 var $elm$html$Html$td = _VirtualDom_node('td');
-var $author$project$Date$dateCompare = F2(
-	function (a, b) {
-		return $elm$time$Time$posixToMillis(
-			$author$project$Date$toPosix(a)) - $elm$time$Time$posixToMillis(
-			$author$project$Date$toPosix(b));
-	});
+var $author$project$Main$UserClickedOnDate = function (a) {
+	return {$: 'UserClickedOnDate', a: a};
+};
 var $author$project$Date$fromWeekday = function (weekday) {
 	switch (weekday.$) {
 		case 'Mon':
@@ -5571,6 +5603,23 @@ var $author$project$Date$format = function (_v0) {
 				$elm$core$String$fromInt(y)
 			]));
 };
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $author$project$Main$viewCalendarCell = F2(
 	function (today, date) {
@@ -5593,7 +5642,9 @@ var $author$project$Main$viewCalendarCell = F2(
 				[
 					$elm$html$Html$Attributes$title(
 					$author$project$Date$format(date)),
-					$elm$html$Html$Attributes$class(cellClass)
+					$elm$html$Html$Attributes$class(cellClass),
+					$elm$html$Html$Events$onClick(
+					$author$project$Main$UserClickedOnDate(date))
 				]),
 			_List_fromArray(
 				[
@@ -5603,11 +5654,15 @@ var $author$project$Main$viewCalendarCell = F2(
 				]));
 	});
 var $author$project$Main$viewWeek = F2(
-	function (today, weekNumber) {
+	function (model, weekNumber) {
 		var firstDateOf0 = $author$project$Date$firstDateOfWeekZero(
-			$author$project$Date$getYear(today));
+			$author$project$Date$getYear(model.today));
 		var firstDateOfWeek = A2($author$project$Date$addDay, firstDateOf0, weekNumber * 7);
 		var lastDateOfWeek = A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + 6);
+		var isEventOnThisWeek = function (event) {
+			return (A2($author$project$Date$dateCompare, event.start, firstDateOfWeek) > 0) && (A2($author$project$Date$dateCompare, event.start, lastDateOfWeek) < 0);
+		};
+		var listOfEventsForThisWeek = A2($elm$core$List$filter, isEventOnThisWeek, model.events);
 		var diffDays = $author$project$Date$getDay(lastDateOfWeek) - $author$project$Date$getDay(firstDateOfWeek);
 		var monthColAttribs = ((diffDays < 0) || ($author$project$Date$getDay(firstDateOfWeek) === 1)) ? _List_fromArray(
 			[
@@ -5616,7 +5671,7 @@ var $author$project$Main$viewWeek = F2(
 		var cellHtml = function (i) {
 			return A2(
 				$author$project$Main$viewCalendarCell,
-				today,
+				model.today,
 				A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + i));
 		};
 		var _v0 = lastDateOfWeek;
@@ -5629,18 +5684,31 @@ var $author$project$Main$viewWeek = F2(
 		return A2(
 			$elm$html$Html$tr,
 			_List_Nil,
-			A2(
-				$elm$core$List$append,
+			$elm$core$List$concat(
 				_List_fromArray(
 					[
-						A2($elm$html$Html$td, monthColAttribs, monthColContent)
-					]),
-				A2(
-					$elm$core$List$map,
-					cellHtml,
-					A2($elm$core$List$range, 0, 6))));
+						_List_fromArray(
+						[
+							A2($elm$html$Html$td, monthColAttribs, monthColContent)
+						]),
+						A2(
+						$elm$core$List$map,
+						cellHtml,
+						A2($elm$core$List$range, 0, 6)),
+						_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$td,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$elm$html$Html$text(
+									($elm$core$List$length(listOfEventsForThisWeek) > 0) ? 'OK' : '')
+								]))
+						])
+					])));
 	});
-var $author$project$Main$viewYear = function (today) {
+var $author$project$Main$viewYear = function (model) {
 	return A2(
 		$elm$html$Html$table,
 		_List_Nil,
@@ -5713,13 +5781,13 @@ var $author$project$Main$viewYear = function (today) {
 				]),
 			A2(
 				$elm$core$List$map,
-				$author$project$Main$viewWeek(today),
+				$author$project$Main$viewWeek(model),
 				A2($elm$core$List$range, 0, 52))));
 };
 var $author$project$Main$view = function (model) {
 	var body = _List_fromArray(
 		[
-			$author$project$Main$viewYear(model.today)
+			$author$project$Main$viewYear(model)
 		]);
 	return A2($elm$browser$Browser$Document, 'Compact calendar', body);
 };
