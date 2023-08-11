@@ -1,11 +1,11 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, text, table, thead, tbody, tr, th, td, ul, li)
-import Html.Attributes exposing (title, class)
+import Html exposing (Html, button, div, text, table, thead, tbody, tr, th, td, ul, li, details, summary, span, button)
+import Html.Attributes exposing (title, class, style)
 import Html.Events exposing (onClick)
 import Time exposing (Posix, Weekday(..), Month(..), millisToPosix, utc, toMillis)
-import Date exposing (Date(..), dateForWeek, firstDateOfWeekZero, addDay, fromMonth, format, getDay, getMonthNumber, getDow, getYear, monthFromNum, dateCompare, toPosix, formatShort)
+import Date exposing (Date(..), firstDateOfWeekZero, addDay, fromMonth, format, getDay, getMonthNumber, getDow, getYear, monthFromNum, dateCompare, toPosix, formatShort, millisInDay)
 
 
 -- MAIN
@@ -71,7 +71,10 @@ init date =
 
 -- UPDATE
 
-type Msg = UserClickedOnDate Date
+type Msg
+    = UserClickedOnDate Date
+    | UserDeletedEvent Event
+
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -82,6 +85,11 @@ update msg model =
                 newEvent = { start = date, durationInDays = 1, title = "new event" }
             in
             ({model | events = List.append [newEvent] model.events}, Cmd.none)
+
+        UserDeletedEvent eventToDelete ->
+            ( { model | events = List.filter (\e -> e /= eventToDelete) model.events }
+            , Cmd.none
+            )
 
 
 
@@ -162,20 +170,11 @@ viewWeek model weekNumber =
             else
                 [ ]
 
-        isEventOnThisWeek : Event -> Bool
-        isEventOnThisWeek event =
-            dateCompare event.start firstDateOfWeek > 0 &&
-            dateCompare event.start lastDateOfWeek < 0
-
-        listOfEventsForThisWeek =
-            List.filter isEventOnThisWeek model.events
-
     in
     tr []
         (List.concat
              [ [td monthColAttribs  monthColContent]
              , List.map cellHtml (List.range 0 6)
-             , [td [] [ text (if List.length listOfEventsForThisWeek > 0 then (String.fromInt (List.length listOfEventsForThisWeek)) else "") ]]
              ]
         )
 
@@ -201,16 +200,40 @@ viewYear model =
 
 viewEvent : Event -> Html Msg
 viewEvent event =
-    li [] [ (formatShort event.start) ++ ": " ++ event.title |> text ]
+    li []
+        [ span [] [ (formatShort event.start) ++ ": " ++ event.title |> text ]
+        , button [ onClick (UserDeletedEvent event)] [ text "X" ]
+        ]
+
+
+
+isEventPast : Date -> Event -> Bool
+isEventPast today event =
+    dateCompare event.start today < 0
+
+
+isEventFuture : Date -> Event -> Bool
+isEventFuture today event =
+    dateCompare event.start today >= 0
 
 
 viewEvents : Model -> Html Msg
 viewEvents model =
     let
-        sortedEvents = List.sortWith eventSortCompare model.events
+        pastEvents = List.filter (isEventPast model.today) model.events |> List.sortWith eventSortCompare
+        presentFutureEvents = List.filter (isEventFuture model.today) model.events  |> List.sortWith eventSortCompare
+        offset = dateCompare model.today (Date (getYear model.today) Jan 1) // millisInDay // 7 * 28 |> String.fromInt
     in
-    ul []
-        (List.map viewEvent sortedEvents)
+        div [ class "events-pane", style "top" (offset ++ "px") ]
+            [ details []
+                  [ summary []
+                        [ (String.fromInt (List.length pastEvents)) ++ " past events" |> text ]
+                  , ul [] (List.map viewEvent pastEvents)
+                  ]
+
+        , ul []
+            (List.map viewEvent presentFutureEvents)
+        ]
 
 
 view : Model -> Browser.Document Msg

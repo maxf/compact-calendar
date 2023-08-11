@@ -5246,21 +5246,49 @@ var $elm$core$List$append = F2(
 			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
 		}
 	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var date = msg.a;
-		var newEvent = {durationInDays: 1, start: date, title: 'new event'};
-		return _Utils_Tuple2(
-			_Utils_update(
-				model,
-				{
-					events: A2(
-						$elm$core$List$append,
-						_List_fromArray(
-							[newEvent]),
-						model.events)
-				}),
-			$elm$core$Platform$Cmd$none);
+		if (msg.$ === 'UserClickedOnDate') {
+			var date = msg.a;
+			var newEvent = {durationInDays: 1, start: date, title: 'new event'};
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						events: A2(
+							$elm$core$List$append,
+							_List_fromArray(
+								[newEvent]),
+							model.events)
+					}),
+				$elm$core$Platform$Cmd$none);
+		} else {
+			var eventToDelete = msg.a;
+			return _Utils_Tuple2(
+				_Utils_update(
+					model,
+					{
+						events: A2(
+							$elm$core$List$filter,
+							function (e) {
+								return !_Utils_eq(e, eventToDelete);
+							},
+							model.events)
+					}),
+				$elm$core$Platform$Cmd$none);
+		}
 	});
 var $elm$browser$Browser$Document = F2(
 	function (title, body) {
@@ -5287,7 +5315,6 @@ var $author$project$Date$countLeapYears = function (year) {
 	return max - (century - _false);
 };
 var $elm$core$Basics$modBy = _Basics_modBy;
-var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Date$isLeapYear = function (y) {
 	return ((!A2($elm$core$Basics$modBy, 4, y)) && (!(!A2($elm$core$Basics$modBy, 100, y)))) || (!A2($elm$core$Basics$modBy, 400, y));
 };
@@ -5340,13 +5367,36 @@ var $author$project$Date$dateCompare = F2(
 			$author$project$Date$toPosix(a)) - $elm$time$Time$posixToMillis(
 			$author$project$Date$toPosix(b));
 	});
+var $elm$html$Html$details = _VirtualDom_node('details');
 var $author$project$Main$eventSortCompare = F2(
 	function (a, b) {
 		var diff = A2($author$project$Date$dateCompare, a.start, b.start);
 		return (diff < 0) ? $elm$core$Basics$LT : ((!diff) ? $elm$core$Basics$EQ : $elm$core$Basics$GT);
 	});
+var $author$project$Date$getYear = function (_v0) {
+	var y = _v0.a;
+	return y;
+};
+var $elm$core$Basics$ge = _Utils_ge;
+var $author$project$Main$isEventFuture = F2(
+	function (today, event) {
+		return A2($author$project$Date$dateCompare, event.start, today) >= 0;
+	});
+var $author$project$Main$isEventPast = F2(
+	function (today, event) {
+		return A2($author$project$Date$dateCompare, event.start, today) < 0;
+	});
 var $elm$core$List$sortWith = _List_sortWith;
+var $elm$virtual_dom$VirtualDom$style = _VirtualDom_style;
+var $elm$html$Html$Attributes$style = $elm$virtual_dom$VirtualDom$style;
+var $elm$html$Html$summary = _VirtualDom_node('summary');
+var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
+var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$UserDeletedEvent = function (a) {
+	return {$: 'UserDeletedEvent', a: a};
+};
+var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$Date$getMonthNumber = function (_v0) {
 	var y = _v0.a;
 	var m = _v0.b;
@@ -5395,24 +5445,108 @@ var $author$project$Date$formatShort = function (_v0) {
 			]));
 };
 var $elm$html$Html$li = _VirtualDom_node('li');
-var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
-var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$span = _VirtualDom_node('span');
 var $author$project$Main$viewEvent = function (event) {
 	return A2(
 		$elm$html$Html$li,
 		_List_Nil,
 		_List_fromArray(
 			[
-				$elm$html$Html$text(
-				$author$project$Date$formatShort(event.start) + (': ' + event.title))
+				A2(
+				$elm$html$Html$span,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$elm$html$Html$text(
+						$author$project$Date$formatShort(event.start) + (': ' + event.title))
+					])),
+				A2(
+				$elm$html$Html$button,
+				_List_fromArray(
+					[
+						$elm$html$Html$Events$onClick(
+						$author$project$Main$UserDeletedEvent(event))
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('X')
+					]))
 			]));
 };
 var $author$project$Main$viewEvents = function (model) {
-	var sortedEvents = A2($elm$core$List$sortWith, $author$project$Main$eventSortCompare, model.events);
+	var presentFutureEvents = A2(
+		$elm$core$List$sortWith,
+		$author$project$Main$eventSortCompare,
+		A2(
+			$elm$core$List$filter,
+			$author$project$Main$isEventFuture(model.today),
+			model.events));
+	var pastEvents = A2(
+		$elm$core$List$sortWith,
+		$author$project$Main$eventSortCompare,
+		A2(
+			$elm$core$List$filter,
+			$author$project$Main$isEventPast(model.today),
+			model.events));
+	var offset = $elm$core$String$fromInt(
+		((((A2(
+			$author$project$Date$dateCompare,
+			model.today,
+			A3(
+				$author$project$Date$Date,
+				$author$project$Date$getYear(model.today),
+				$elm$time$Time$Jan,
+				1)) / $author$project$Date$millisInDay) | 0) / 7) | 0) * 28);
 	return A2(
-		$elm$html$Html$ul,
-		_List_Nil,
-		A2($elm$core$List$map, $author$project$Main$viewEvent, sortedEvents));
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('events-pane'),
+				A2($elm$html$Html$Attributes$style, 'top', offset + 'px')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$details,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$summary,
+						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$elm$core$String$fromInt(
+									$elm$core$List$length(pastEvents)) + ' past events')
+							])),
+						A2(
+						$elm$html$Html$ul,
+						_List_Nil,
+						A2($elm$core$List$map, $author$project$Main$viewEvent, pastEvents))
+					])),
+				A2(
+				$elm$html$Html$ul,
+				_List_Nil,
+				A2($elm$core$List$map, $author$project$Main$viewEvent, presentFutureEvents))
+			]));
 };
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$html$Html$th = _VirtualDom_node('th');
@@ -5457,7 +5591,6 @@ var $elm$time$Time$toAdjustedMinutes = F2(
 				60000),
 			eras);
 	});
-var $elm$core$Basics$ge = _Utils_ge;
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
@@ -5539,17 +5672,6 @@ var $author$project$Date$addDay = F2(
 var $elm$core$List$concat = function (lists) {
 	return A3($elm$core$List$foldr, $elm$core$List$append, _List_Nil, lists);
 };
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
 var $elm$time$Time$Fri = {$: 'Fri'};
 var $elm$time$Time$Mon = {$: 'Mon'};
 var $elm$time$Time$Sat = {$: 'Sat'};
@@ -5641,10 +5763,6 @@ var $author$project$Date$getDay = function (_v0) {
 	var d = _v0.c;
 	return d;
 };
-var $author$project$Date$getYear = function (_v0) {
-	var y = _v0.a;
-	return y;
-};
 var $elm$html$Html$td = _VirtualDom_node('td');
 var $author$project$Main$UserClickedOnDate = function (a) {
 	return {$: 'UserClickedOnDate', a: a};
@@ -5685,23 +5803,6 @@ var $author$project$Date$format = function (_v0) {
 				monthString,
 				$elm$core$String$fromInt(y)
 			]));
-};
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
 };
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $author$project$Main$viewCalendarCell = F2(
@@ -5758,10 +5859,6 @@ var $author$project$Main$viewWeek = F2(
 			$author$project$Date$getYear(model.today));
 		var firstDateOfWeek = A2($author$project$Date$addDay, firstDateOf0, weekNumber * 7);
 		var lastDateOfWeek = A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + 6);
-		var isEventOnThisWeek = function (event) {
-			return (A2($author$project$Date$dateCompare, event.start, firstDateOfWeek) > 0) && (A2($author$project$Date$dateCompare, event.start, lastDateOfWeek) < 0);
-		};
-		var listOfEventsForThisWeek = A2($elm$core$List$filter, isEventOnThisWeek, model.events);
 		var diffDays = $author$project$Date$getDay(lastDateOfWeek) - $author$project$Date$getDay(firstDateOfWeek);
 		var monthColAttribs = ((diffDays < 0) || ($author$project$Date$getDay(firstDateOfWeek) === 1)) ? _List_fromArray(
 			[
@@ -5793,19 +5890,7 @@ var $author$project$Main$viewWeek = F2(
 						A2(
 						$elm$core$List$map,
 						cellHtml,
-						A2($elm$core$List$range, 0, 6)),
-						_List_fromArray(
-						[
-							A2(
-							$elm$html$Html$td,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$elm$html$Html$text(
-									($elm$core$List$length(listOfEventsForThisWeek) > 0) ? $elm$core$String$fromInt(
-										$elm$core$List$length(listOfEventsForThisWeek)) : '')
-								]))
-						])
+						A2($elm$core$List$range, 0, 6))
 					])));
 	});
 var $author$project$Main$viewYear = function (model) {

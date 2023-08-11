@@ -99,12 +99,6 @@ daysBeforeMonth m y =
             334 + addLeap
 
 
--- returns the date of the given weekday of the given week number
-dateForWeek : Weekday -> Int -> Int -> Int
-dateForWeek weekday weekNumber year =
-    2
-
-
 -- returns the day-of-week of the 1/1 of the year passed
 
 firstDateOfWeekZero: Int -> Date
