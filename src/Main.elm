@@ -1,9 +1,10 @@
 module Main exposing (..)
 
 import Browser
-import Html exposing (Html, button, div, text, table, thead, tbody, tr, th, td, ul, li, details, summary, span, button)
-import Html.Attributes exposing (title, class, style)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, text, table, thead, tbody, tr, th, td, ul, li, details, summary, span, button, input)
+import Html.Attributes exposing (title, class, style, value)
+import Html.Events exposing (onClick, onInput, onBlur, keyCode, on)
+import Html.Events.Extra exposing (onEnter)
 import Time exposing (Posix, Weekday(..), Month(..), millisToPosix, utc, toMillis)
 import Date exposing (Date(..), firstDateOfWeekZero, addDay, fromMonth, format, getDay, getMonthNumber, getDow, getYear, monthFromNum, dateCompare, toPosix, formatShort, millisInDay)
 
@@ -27,6 +28,7 @@ type alias Event =
     { start: Date
     , durationInDays: Int
     , title: String
+    , editing: Bool
     }
 
 
@@ -54,15 +56,18 @@ init date =
                    { start = Date 2023 Aug 15
                    , durationInDays = 1
                    , title = "event1"
+                   , editing = False
                    }
-                   , { start = Date 2023 Aug 16
-                   , durationInDays = 1
-                   , title = "event1.5"
-                   }
-                   , { start = Date 2023 Sep 1
-                   , durationInDays = 1
-                   , title = "event2"
-                   }
+                  , { start = Date 2023 Aug 16
+                    , durationInDays = 1
+                    , title = "event1.5"
+                    , editing = False
+                    }
+                  , { start = Date 2023 Sep 1
+                    , durationInDays = 1
+                    , title = "event2"
+                    , editing = False
+                    }
                   ]
             }
     in
@@ -71,9 +76,24 @@ init date =
 
 -- UPDATE
 
+
 type Msg
     = UserClickedOnDate Date
     | UserDeletedEvent Event
+    | UserTypedInNewEvent Event String
+    | UserRemovedNewEventFocus Event
+    | UserClickedEventTitle Event
+
+
+modifyModelEventEditing : Model -> Event -> Bool -> Model
+modifyModelEventEditing model event newValue =
+    let
+        updatedEvents =
+            List.append
+                (List.filter (\e -> e /= event) model.events)
+                [{ event | editing = newValue }]
+    in
+        { model | events = updatedEvents }
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -82,7 +102,7 @@ update msg model =
         UserClickedOnDate date ->
             let
                 newEvent: Event
-                newEvent = { start = date, durationInDays = 1, title = "new event" }
+                newEvent = { start = date, durationInDays = 1, title = "new event", editing = True }
             in
             ({model | events = List.append [newEvent] model.events}, Cmd.none)
 
@@ -90,9 +110,20 @@ update msg model =
             ( { model | events = List.filter (\e -> e /= eventToDelete) model.events }
             , Cmd.none
             )
+        UserTypedInNewEvent event input ->
+            let
+                updatedEvents =
+                    List.append
+                        (List.filter (\e -> e /= event) model.events)
+                        [{ event | title = input }]
+            in
+            ({ model | events = updatedEvents }, Cmd.none )
 
+        UserRemovedNewEventFocus event ->
+            ( modifyModelEventEditing model event False, Cmd.none )
 
-
+        UserClickedEventTitle event ->
+            ( modifyModelEventEditing model event True, Cmd.none )
 -- VIEW
 
 viewCalendarCell: Model -> Date -> Html Msg
@@ -200,9 +231,25 @@ viewYear model =
 
 viewEvent : Event -> Html Msg
 viewEvent event =
+    let
+        html =
+            if event.editing then
+                input
+                    [ onEnter (UserRemovedNewEventFocus event)
+                    , onInput (UserTypedInNewEvent event)
+                    , onBlur (UserRemovedNewEventFocus event)
+                    , value event.title
+                    ]
+                    []
+            else
+                span
+                  [ onClick (UserClickedEventTitle event) ]
+                  [ event.title |> text ]
+    in
     li []
-        [ span [] [ (formatShort event.start) ++ ": " ++ event.title |> text ]
-        , button [ onClick (UserDeletedEvent event)] [ text "X" ]
+        [ span [] [ (formatShort event.start) ++ ": " |> text ]
+        , html
+        , button [ onClick (UserDeletedEvent event) ] [ text "X" ]
         ]
 
 

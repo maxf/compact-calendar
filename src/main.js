@@ -5213,16 +5213,19 @@ var $author$project$Main$init = function (date) {
 			[
 				{
 				durationInDays: 1,
+				editing: false,
 				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Aug, 15),
 				title: 'event1'
 			},
 				{
 				durationInDays: 1,
+				editing: false,
 				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Aug, 16),
 				title: 'event1.5'
 			},
 				{
 				durationInDays: 1,
+				editing: false,
 				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Sep, 1),
 				title: 'event2'
 			}
@@ -5258,36 +5261,89 @@ var $elm$core$List$filter = F2(
 			list);
 	});
 var $elm$core$Basics$neq = _Utils_notEqual;
+var $author$project$Main$modifyModelEventEditing = F3(
+	function (model, event, newValue) {
+		var updatedEvents = A2(
+			$elm$core$List$append,
+			A2(
+				$elm$core$List$filter,
+				function (e) {
+					return !_Utils_eq(e, event);
+				},
+				model.events),
+			_List_fromArray(
+				[
+					_Utils_update(
+					event,
+					{editing: newValue})
+				]));
+		return _Utils_update(
+			model,
+			{events: updatedEvents});
+	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'UserClickedOnDate') {
-			var date = msg.a;
-			var newEvent = {durationInDays: 1, start: date, title: 'new event'};
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						events: A2(
-							$elm$core$List$append,
-							_List_fromArray(
-								[newEvent]),
-							model.events)
-					}),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			var eventToDelete = msg.a;
-			return _Utils_Tuple2(
-				_Utils_update(
-					model,
-					{
-						events: A2(
-							$elm$core$List$filter,
-							function (e) {
-								return !_Utils_eq(e, eventToDelete);
-							},
-							model.events)
-					}),
-				$elm$core$Platform$Cmd$none);
+		switch (msg.$) {
+			case 'UserClickedOnDate':
+				var date = msg.a;
+				var newEvent = {durationInDays: 1, editing: true, start: date, title: 'new event'};
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							events: A2(
+								$elm$core$List$append,
+								_List_fromArray(
+									[newEvent]),
+								model.events)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserDeletedEvent':
+				var eventToDelete = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							events: A2(
+								$elm$core$List$filter,
+								function (e) {
+									return !_Utils_eq(e, eventToDelete);
+								},
+								model.events)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserTypedInNewEvent':
+				var event = msg.a;
+				var input = msg.b;
+				var updatedEvents = A2(
+					$elm$core$List$append,
+					A2(
+						$elm$core$List$filter,
+						function (e) {
+							return !_Utils_eq(e, event);
+						},
+						model.events),
+					_List_fromArray(
+						[
+							_Utils_update(
+							event,
+							{title: input})
+						]));
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{events: updatedEvents}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserRemovedNewEventFocus':
+				var event = msg.a;
+				return _Utils_Tuple2(
+					A3($author$project$Main$modifyModelEventEditing, model, event, false),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var event = msg.a;
+				return _Utils_Tuple2(
+					A3($author$project$Main$modifyModelEventEditing, model, event, true),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $elm$browser$Browser$Document = F2(
@@ -5393,9 +5449,19 @@ var $elm$html$Html$summary = _VirtualDom_node('summary');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$ul = _VirtualDom_node('ul');
+var $author$project$Main$UserClickedEventTitle = function (a) {
+	return {$: 'UserClickedEventTitle', a: a};
+};
 var $author$project$Main$UserDeletedEvent = function (a) {
 	return {$: 'UserDeletedEvent', a: a};
 };
+var $author$project$Main$UserRemovedNewEventFocus = function (a) {
+	return {$: 'UserRemovedNewEventFocus', a: a};
+};
+var $author$project$Main$UserTypedInNewEvent = F2(
+	function (a, b) {
+		return {$: 'UserTypedInNewEvent', a: a, b: b};
+	});
 var $elm$html$Html$button = _VirtualDom_node('button');
 var $author$project$Date$getMonthNumber = function (_v0) {
 	var y = _v0.a;
@@ -5444,6 +5510,7 @@ var $author$project$Date$formatShort = function (_v0) {
 				$elm$core$String$fromInt(y)
 			]));
 };
+var $elm$html$Html$input = _VirtualDom_node('input');
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
@@ -5456,14 +5523,90 @@ var $elm$html$Html$Events$on = F2(
 			event,
 			$elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
+var $elm$html$Html$Events$onBlur = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'blur',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$html$Html$Events$onClick = function (msg) {
 	return A2(
 		$elm$html$Html$Events$on,
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$html$Html$Events$keyCode = A2($elm$json$Json$Decode$field, 'keyCode', $elm$json$Json$Decode$int);
+var $elm_community$html_extra$Html$Events$Extra$onEnter = function (onEnterAction) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'keyup',
+		A2(
+			$elm$json$Json$Decode$andThen,
+			function (keyCode) {
+				return (keyCode === 13) ? $elm$json$Json$Decode$succeed(onEnterAction) : $elm$json$Json$Decode$fail(
+					$elm$core$String$fromInt(keyCode));
+			},
+			$elm$html$Html$Events$keyCode));
+};
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
 var $elm$html$Html$span = _VirtualDom_node('span');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $author$project$Main$viewEvent = function (event) {
+	var html = event.editing ? A2(
+		$elm$html$Html$input,
+		_List_fromArray(
+			[
+				$elm_community$html_extra$Html$Events$Extra$onEnter(
+				$author$project$Main$UserRemovedNewEventFocus(event)),
+				$elm$html$Html$Events$onInput(
+				$author$project$Main$UserTypedInNewEvent(event)),
+				$elm$html$Html$Events$onBlur(
+				$author$project$Main$UserRemovedNewEventFocus(event)),
+				$elm$html$Html$Attributes$value(event.title)
+			]),
+		_List_Nil) : A2(
+		$elm$html$Html$span,
+		_List_fromArray(
+			[
+				$elm$html$Html$Events$onClick(
+				$author$project$Main$UserClickedEventTitle(event))
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(event.title)
+			]));
 	return A2(
 		$elm$html$Html$li,
 		_List_Nil,
@@ -5475,8 +5618,9 @@ var $author$project$Main$viewEvent = function (event) {
 				_List_fromArray(
 					[
 						$elm$html$Html$text(
-						$author$project$Date$formatShort(event.start) + (': ' + event.title))
+						$author$project$Date$formatShort(event.start) + ': ')
 					])),
+				html,
 				A2(
 				$elm$html$Html$button,
 				_List_fromArray(
