@@ -47,10 +47,23 @@
 <body>
   <div id="myapp"></div>
   <script>
+   // Extract the stored data from previous sessions.
+   var storedData = localStorage.getItem('events');
+   var events = storedData ? JSON.parse(storedData) : null;
+
+   console.log('events', events)
+
+   // Load the Elm app, passing in the JS data.
    var today = new Date();
    var app = Elm.Main.init({
      node: document.getElementById('myapp'),
-     flags: { day: today.getDate(), month: today.getMonth(), year: today.getFullYear() }
+     flags: { day: today.getDate(), month: today.getMonth(), year: today.getFullYear(), events }
+   });
+
+   // Listen for commands from the `setStorage` port.
+   // Turn the data to a string and put it in localStorage.
+   app.ports.setStorage.subscribe(function(state) {
+     localStorage.setItem('events', JSON.stringify(state));
    });
   </script>
 </body>

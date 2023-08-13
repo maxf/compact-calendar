@@ -1,12 +1,14 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Browser
 import Html exposing (Html, button, div, text, table, thead, tbody, tr, th, td, ul, li, details, summary, span, button, input)
 import Html.Attributes exposing (title, class, style, value)
 import Html.Events exposing (onClick, onInput, onBlur, keyCode, on)
 import Html.Events.Extra exposing (onEnter)
-import Time exposing (Posix, Weekday(..), Month(..), millisToPosix, utc, toMillis)
-import Date exposing (Date(..), firstDateOfWeekZero, addDay, fromMonth, format, getDay, getMonthNumber, getDow, getYear, monthFromNum, dateCompare, toPosix, formatShort, millisInDay)
+import Time exposing (Posix, Weekday(..), Month(..), millisToPosix, utc, toMillis, posixToMillis)
+import Json.Decode as D
+import Json.Encode as E
+import Date exposing (Date(..), firstDateOfWeekZero, addDay, fromMonth, format, getDay, getMonthNumber, getDow, getYear, monthFromNum, dateCompare, toPosix, formatShort, millisInDay, fromPosix)
 
 
 -- MAIN
@@ -15,11 +17,12 @@ import Date exposing (Date(..), firstDateOfWeekZero, addDay, fromMonth, format, 
 main =
   Browser.document
       { init = init
-      , update = update
+      , update = updateWithStorage
       , view = view
       , subscriptions = \model -> Sub.none
       }
 
+port setStorage : E.Value -> Cmd msg
 
 -- MODEL
 
@@ -46,32 +49,61 @@ type alias Model =
     }
 
 
-init : { day: Int, month: Int, year: Int } -> (Model, Cmd Msg)
-init date =
+init : { day: Int, month: Int, year: Int, events: E.Value } -> ( Model, Cmd Msg )
+init flags =
     let
         initialModel =
-            { today = (Date date.year (monthFromNum date.month) date.day)
+            { today = (Date flags.year (monthFromNum flags.month) flags.day)
             , events =
-                  [
-                   { start = Date 2023 Aug 15
-                   , durationInDays = 1
-                   , title = "event1"
-                   , editing = False
-                   }
-                  , { start = Date 2023 Aug 16
-                    , durationInDays = 1
-                    , title = "event1.5"
-                    , editing = False
-                    }
-                  , { start = Date 2023 Sep 1
-                    , durationInDays = 1
-                    , title = "event2"
-                    , editing = False
-                    }
-                  ]
+                case D.decodeValue eventsDecoder flags.events of
+                    Ok events -> events
+                    Err x ->
+                        let
+                            _ = Debug.log "Error decoding events" x
+                        in
+                        []
             }
     in
     (initialModel, Cmd.none)
+
+
+eventsDecoder : D.Decoder (List Event)
+eventsDecoder =
+    D.list eventDecoder
+
+
+eventDecoder : D.Decoder Event
+eventDecoder =
+    D.map4 Event
+        (D.field "start" dateDecoder)
+        (D.field "durationInDays" D.int)
+        (D.field "title" D.string)
+        (D.field "editing" D.bool)
+
+
+dateDecoder : D.Decoder Date
+dateDecoder =
+    D.map (fromPosix << millisToPosix) D.int
+
+
+dateEncode : Date -> E.Value
+dateEncode date =
+    E.int (date |> toPosix |> posixToMillis)
+
+
+eventsEncode : List Event -> E.Value
+eventsEncode events =
+    E.list eventEncode events
+
+
+eventEncode : Event -> E.Value
+eventEncode event =
+    E.object
+        [ ("start", dateEncode event.start)
+        , ("durationInDays", E.int event.durationInDays)
+        , ("title", E.string event.title)
+        , ("editing", E.bool event.editing)
+        ]
 
 
 -- UPDATE
@@ -85,15 +117,39 @@ type Msg
     | UserClickedEventTitle Event
 
 
+eventsNotEqual : Event -> Event -> Bool
+eventsNotEqual a b =
+    ( a.start, a.title, a.durationInDays ) /= ( b.start, b.title, b.durationInDays )
+
 modifyModelEventEditing : Model -> Event -> Bool -> Model
 modifyModelEventEditing model event newValue =
     let
         updatedEvents =
             List.append
-                (List.filter (\e -> e /= event) model.events)
+                (List.filter (\e -> eventsNotEqual e event) model.events)
                 [{ event | editing = newValue }]
+        _ = Debug.log "1>>" model.events
+        _ = Debug.log "e>>" event
+        _ = Debug.log "v>>" newValue
+        _ = Debug.log "2>>" updatedEvents
+
     in
         { model | events = updatedEvents }
+
+
+-- We want to `setStorage` on every update, so this function adds
+-- the setStorage command on each step of the update function.
+--
+-- Check out index.html to see how this is handled on the JS side.
+--
+updateWithStorage : Msg -> Model -> ( Model, Cmd Msg )
+updateWithStorage msg oldModel =
+    let
+        ( newModel, cmds ) = update msg oldModel
+    in
+        ( newModel
+        , Cmd.batch [ setStorage (eventsEncode newModel.events), cmds ]
+        )
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
@@ -102,19 +158,19 @@ update msg model =
         UserClickedOnDate date ->
             let
                 newEvent: Event
-                newEvent = { start = date, durationInDays = 1, title = "new event", editing = True }
+                newEvent = { start = date, durationInDays = 1, title = "new event", editing = False }
             in
             ({model | events = List.append [newEvent] model.events}, Cmd.none)
 
         UserDeletedEvent eventToDelete ->
-            ( { model | events = List.filter (\e -> e /= eventToDelete) model.events }
+            ( { model | events = List.filter (\e -> eventsNotEqual e eventToDelete) model.events }
             , Cmd.none
             )
         UserTypedInNewEvent event input ->
             let
                 updatedEvents =
                     List.append
-                        (List.filter (\e -> e /= event) model.events)
+                        (List.filter (\e -> eventsNotEqual e event) model.events)
                         [{ event | title = input }]
             in
             ({ model | events = updatedEvents }, Cmd.none )

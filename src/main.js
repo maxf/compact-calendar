@@ -5161,13 +5161,91 @@ var $elm$core$Task$perform = F2(
 	});
 var $elm$browser$Browser$document = _Browser_document;
 var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$time$Time$Aug = {$: 'Aug'};
 var $author$project$Date$Date = F3(
 	function (a, b, c) {
 		return {$: 'Date', a: a, b: b, c: c};
 	});
-var $elm$time$Time$Sep = {$: 'Sep'};
+var $elm$json$Json$Decode$decodeValue = _Json_run;
+var $author$project$Main$Event = F4(
+	function (start, durationInDays, title, editing) {
+		return {durationInDays: durationInDays, editing: editing, start: start, title: title};
+	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $elm$time$Time$flooredDiv = F2(
+	function (numerator, denominator) {
+		return $elm$core$Basics$floor(numerator / denominator);
+	});
+var $elm$time$Time$posixToMillis = function (_v0) {
+	var millis = _v0.a;
+	return millis;
+};
+var $elm$time$Time$toAdjustedMinutesHelp = F3(
+	function (defaultOffset, posixMinutes, eras) {
+		toAdjustedMinutesHelp:
+		while (true) {
+			if (!eras.b) {
+				return posixMinutes + defaultOffset;
+			} else {
+				var era = eras.a;
+				var olderEras = eras.b;
+				if (_Utils_cmp(era.start, posixMinutes) < 0) {
+					return posixMinutes + era.offset;
+				} else {
+					var $temp$defaultOffset = defaultOffset,
+						$temp$posixMinutes = posixMinutes,
+						$temp$eras = olderEras;
+					defaultOffset = $temp$defaultOffset;
+					posixMinutes = $temp$posixMinutes;
+					eras = $temp$eras;
+					continue toAdjustedMinutesHelp;
+				}
+			}
+		}
+	});
+var $elm$time$Time$toAdjustedMinutes = F2(
+	function (_v0, time) {
+		var defaultOffset = _v0.a;
+		var eras = _v0.b;
+		return A3(
+			$elm$time$Time$toAdjustedMinutesHelp,
+			defaultOffset,
+			A2(
+				$elm$time$Time$flooredDiv,
+				$elm$time$Time$posixToMillis(time),
+				60000),
+			eras);
+	});
+var $elm$core$Basics$ge = _Utils_ge;
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
+var $elm$time$Time$toCivil = function (minutes) {
+	var rawDay = A2($elm$time$Time$flooredDiv, minutes, 60 * 24) + 719468;
+	var era = (((rawDay >= 0) ? rawDay : (rawDay - 146096)) / 146097) | 0;
+	var dayOfEra = rawDay - (era * 146097);
+	var yearOfEra = ((((dayOfEra - ((dayOfEra / 1460) | 0)) + ((dayOfEra / 36524) | 0)) - ((dayOfEra / 146096) | 0)) / 365) | 0;
+	var dayOfYear = dayOfEra - (((365 * yearOfEra) + ((yearOfEra / 4) | 0)) - ((yearOfEra / 100) | 0));
+	var mp = (((5 * dayOfYear) + 2) / 153) | 0;
+	var month = mp + ((mp < 10) ? 3 : (-9));
+	var year = yearOfEra + (era * 400);
+	return {
+		day: (dayOfYear - ((((153 * mp) + 2) / 5) | 0)) + 1,
+		month: month,
+		year: year + ((month <= 2) ? 1 : 0)
+	};
+};
+var $elm$time$Time$toDay = F2(
+	function (zone, time) {
+		return $elm$time$Time$toCivil(
+			A2($elm$time$Time$toAdjustedMinutes, zone, time)).day;
+	});
 var $elm$time$Time$Apr = {$: 'Apr'};
+var $elm$time$Time$Aug = {$: 'Aug'};
 var $elm$time$Time$Dec = {$: 'Dec'};
 var $elm$time$Time$Feb = {$: 'Feb'};
 var $elm$time$Time$Jan = {$: 'Jan'};
@@ -5177,6 +5255,76 @@ var $elm$time$Time$Mar = {$: 'Mar'};
 var $elm$time$Time$May = {$: 'May'};
 var $elm$time$Time$Nov = {$: 'Nov'};
 var $elm$time$Time$Oct = {$: 'Oct'};
+var $elm$time$Time$Sep = {$: 'Sep'};
+var $elm$time$Time$toMonth = F2(
+	function (zone, time) {
+		var _v0 = $elm$time$Time$toCivil(
+			A2($elm$time$Time$toAdjustedMinutes, zone, time)).month;
+		switch (_v0) {
+			case 1:
+				return $elm$time$Time$Jan;
+			case 2:
+				return $elm$time$Time$Feb;
+			case 3:
+				return $elm$time$Time$Mar;
+			case 4:
+				return $elm$time$Time$Apr;
+			case 5:
+				return $elm$time$Time$May;
+			case 6:
+				return $elm$time$Time$Jun;
+			case 7:
+				return $elm$time$Time$Jul;
+			case 8:
+				return $elm$time$Time$Aug;
+			case 9:
+				return $elm$time$Time$Sep;
+			case 10:
+				return $elm$time$Time$Oct;
+			case 11:
+				return $elm$time$Time$Nov;
+			default:
+				return $elm$time$Time$Dec;
+		}
+	});
+var $elm$time$Time$toYear = F2(
+	function (zone, time) {
+		return $elm$time$Time$toCivil(
+			A2($elm$time$Time$toAdjustedMinutes, zone, time)).year;
+	});
+var $elm$time$Time$Zone = F2(
+	function (a, b) {
+		return {$: 'Zone', a: a, b: b};
+	});
+var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
+var $author$project$Date$fromPosix = function (posix) {
+	return A3(
+		$author$project$Date$Date,
+		A2($elm$time$Time$toYear, $elm$time$Time$utc, posix),
+		A2($elm$time$Time$toMonth, $elm$time$Time$utc, posix),
+		A2($elm$time$Time$toDay, $elm$time$Time$utc, posix));
+};
+var $elm$json$Json$Decode$int = _Json_decodeInt;
+var $elm$time$Time$Posix = function (a) {
+	return {$: 'Posix', a: a};
+};
+var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
+var $author$project$Main$dateDecoder = A2(
+	$elm$json$Json$Decode$map,
+	A2($elm$core$Basics$composeL, $author$project$Date$fromPosix, $elm$time$Time$millisToPosix),
+	$elm$json$Json$Decode$int);
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Main$eventDecoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$Main$Event,
+	A2($elm$json$Json$Decode$field, 'start', $author$project$Main$dateDecoder),
+	A2($elm$json$Json$Decode$field, 'durationInDays', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'title', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'editing', $elm$json$Json$Decode$bool));
+var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Main$eventsDecoder = $elm$json$Json$Decode$list($author$project$Main$eventDecoder);
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$Date$monthFromNum = function (n) {
 	switch (n) {
 		case 0:
@@ -5207,163 +5355,31 @@ var $author$project$Date$monthFromNum = function (n) {
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$Main$init = function (date) {
+var $author$project$Main$init = function (flags) {
 	var initialModel = {
-		events: _List_fromArray(
-			[
-				{
-				durationInDays: 1,
-				editing: false,
-				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Aug, 15),
-				title: 'event1'
-			},
-				{
-				durationInDays: 1,
-				editing: false,
-				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Aug, 16),
-				title: 'event1.5'
-			},
-				{
-				durationInDays: 1,
-				editing: false,
-				start: A3($author$project$Date$Date, 2023, $elm$time$Time$Sep, 1),
-				title: 'event2'
+		events: function () {
+			var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$Main$eventsDecoder, flags.events);
+			if (_v0.$ === 'Ok') {
+				var events = _v0.a;
+				return events;
+			} else {
+				var x = _v0.a;
+				var _v1 = A2($elm$core$Debug$log, 'Error decoding events', x);
+				return _List_Nil;
 			}
-			]),
+		}(),
 		today: A3(
 			$author$project$Date$Date,
-			date.year,
-			$author$project$Date$monthFromNum(date.month),
-			date.day)
+			flags.year,
+			$author$project$Date$monthFromNum(flags.month),
+			flags.day)
 	};
 	return _Utils_Tuple2(initialModel, $elm$core$Platform$Cmd$none);
 };
-var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $elm$core$List$append = F2(
-	function (xs, ys) {
-		if (!ys.b) {
-			return xs;
-		} else {
-			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
-		}
-	});
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $elm$core$Basics$neq = _Utils_notEqual;
-var $author$project$Main$modifyModelEventEditing = F3(
-	function (model, event, newValue) {
-		var updatedEvents = A2(
-			$elm$core$List$append,
-			A2(
-				$elm$core$List$filter,
-				function (e) {
-					return !_Utils_eq(e, event);
-				},
-				model.events),
-			_List_fromArray(
-				[
-					_Utils_update(
-					event,
-					{editing: newValue})
-				]));
-		return _Utils_update(
-			model,
-			{events: updatedEvents});
-	});
-var $author$project$Main$update = F2(
-	function (msg, model) {
-		switch (msg.$) {
-			case 'UserClickedOnDate':
-				var date = msg.a;
-				var newEvent = {durationInDays: 1, editing: true, start: date, title: 'new event'};
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							events: A2(
-								$elm$core$List$append,
-								_List_fromArray(
-									[newEvent]),
-								model.events)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'UserDeletedEvent':
-				var eventToDelete = msg.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							events: A2(
-								$elm$core$List$filter,
-								function (e) {
-									return !_Utils_eq(e, eventToDelete);
-								},
-								model.events)
-						}),
-					$elm$core$Platform$Cmd$none);
-			case 'UserTypedInNewEvent':
-				var event = msg.a;
-				var input = msg.b;
-				var updatedEvents = A2(
-					$elm$core$List$append,
-					A2(
-						$elm$core$List$filter,
-						function (e) {
-							return !_Utils_eq(e, event);
-						},
-						model.events),
-					_List_fromArray(
-						[
-							_Utils_update(
-							event,
-							{title: input})
-						]));
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{events: updatedEvents}),
-					$elm$core$Platform$Cmd$none);
-			case 'UserRemovedNewEventFocus':
-				var event = msg.a;
-				return _Utils_Tuple2(
-					A3($author$project$Main$modifyModelEventEditing, model, event, false),
-					$elm$core$Platform$Cmd$none);
-			default:
-				var event = msg.a;
-				return _Utils_Tuple2(
-					A3($author$project$Main$modifyModelEventEditing, model, event, true),
-					$elm$core$Platform$Cmd$none);
-		}
-	});
-var $elm$browser$Browser$Document = F2(
-	function (title, body) {
-		return {body: body, title: title};
-	});
-var $elm$json$Json$Encode$string = _Json_wrap;
-var $elm$html$Html$Attributes$stringProperty = F2(
-	function (key, string) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$string(string));
-	});
-var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$time$Time$posixToMillis = function (_v0) {
-	var millis = _v0.a;
-	return millis;
-};
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$Date$countLeapYears = function (year) {
 	var max = ((year / 4) | 0) - 492;
 	var _false = ((year / 400) | 0) - 4;
@@ -5371,6 +5387,7 @@ var $author$project$Date$countLeapYears = function (year) {
 	return max - (century - _false);
 };
 var $elm$core$Basics$modBy = _Basics_modBy;
+var $elm$core$Basics$neq = _Utils_notEqual;
 var $author$project$Date$isLeapYear = function (y) {
 	return ((!A2($elm$core$Basics$modBy, 4, y)) && (!(!A2($elm$core$Basics$modBy, 100, y)))) || (!A2($elm$core$Basics$modBy, 400, y));
 };
@@ -5405,10 +5422,6 @@ var $author$project$Date$daysBeforeMonth = F2(
 		}
 	});
 var $author$project$Date$millisInDay = 86400000;
-var $elm$time$Time$Posix = function (a) {
-	return {$: 'Posix', a: a};
-};
-var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
 var $author$project$Date$toPosix = function (_v0) {
 	var y = _v0.a;
 	var m = _v0.b;
@@ -5417,6 +5430,199 @@ var $author$project$Date$toPosix = function (_v0) {
 	var epoch = (days - 719050) * $author$project$Date$millisInDay;
 	return $elm$time$Time$millisToPosix(epoch);
 };
+var $author$project$Main$dateEncode = function (date) {
+	return $elm$json$Json$Encode$int(
+		$elm$time$Time$posixToMillis(
+			$author$project$Date$toPosix(date)));
+};
+var $elm$json$Json$Encode$object = function (pairs) {
+	return _Json_wrap(
+		A3(
+			$elm$core$List$foldl,
+			F2(
+				function (_v0, obj) {
+					var k = _v0.a;
+					var v = _v0.b;
+					return A3(_Json_addField, k, v, obj);
+				}),
+			_Json_emptyObject(_Utils_Tuple0),
+			pairs));
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$Main$eventEncode = function (event) {
+	return $elm$json$Json$Encode$object(
+		_List_fromArray(
+			[
+				_Utils_Tuple2(
+				'start',
+				$author$project$Main$dateEncode(event.start)),
+				_Utils_Tuple2(
+				'durationInDays',
+				$elm$json$Json$Encode$int(event.durationInDays)),
+				_Utils_Tuple2(
+				'title',
+				$elm$json$Json$Encode$string(event.title)),
+				_Utils_Tuple2(
+				'editing',
+				$elm$json$Json$Encode$bool(event.editing))
+			]));
+};
+var $elm$json$Json$Encode$list = F2(
+	function (func, entries) {
+		return _Json_wrap(
+			A3(
+				$elm$core$List$foldl,
+				_Json_addEntry(func),
+				_Json_emptyArray(_Utils_Tuple0),
+				entries));
+	});
+var $author$project$Main$eventsEncode = function (events) {
+	return A2($elm$json$Json$Encode$list, $author$project$Main$eventEncode, events);
+};
+var $author$project$Main$setStorage = _Platform_outgoingPort('setStorage', $elm$core$Basics$identity);
+var $elm$core$List$append = F2(
+	function (xs, ys) {
+		if (!ys.b) {
+			return xs;
+		} else {
+			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $author$project$Main$eventsNotEqual = F2(
+	function (a, b) {
+		return !_Utils_eq(
+			_Utils_Tuple3(a.start, a.title, a.durationInDays),
+			_Utils_Tuple3(b.start, b.title, b.durationInDays));
+	});
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $author$project$Main$modifyModelEventEditing = F3(
+	function (model, event, newValue) {
+		var updatedEvents = A2(
+			$elm$core$List$append,
+			A2(
+				$elm$core$List$filter,
+				function (e) {
+					return A2($author$project$Main$eventsNotEqual, e, event);
+				},
+				model.events),
+			_List_fromArray(
+				[
+					_Utils_update(
+					event,
+					{editing: newValue})
+				]));
+		var _v0 = A2($elm$core$Debug$log, '1>>', model.events);
+		var _v1 = A2($elm$core$Debug$log, 'e>>', event);
+		var _v2 = A2($elm$core$Debug$log, 'v>>', newValue);
+		var _v3 = A2($elm$core$Debug$log, '2>>', updatedEvents);
+		return _Utils_update(
+			model,
+			{events: updatedEvents});
+	});
+var $author$project$Main$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'UserClickedOnDate':
+				var date = msg.a;
+				var newEvent = {durationInDays: 1, editing: false, start: date, title: 'new event'};
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							events: A2(
+								$elm$core$List$append,
+								_List_fromArray(
+									[newEvent]),
+								model.events)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserDeletedEvent':
+				var eventToDelete = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							events: A2(
+								$elm$core$List$filter,
+								function (e) {
+									return A2($author$project$Main$eventsNotEqual, e, eventToDelete);
+								},
+								model.events)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserTypedInNewEvent':
+				var event = msg.a;
+				var input = msg.b;
+				var updatedEvents = A2(
+					$elm$core$List$append,
+					A2(
+						$elm$core$List$filter,
+						function (e) {
+							return A2($author$project$Main$eventsNotEqual, e, event);
+						},
+						model.events),
+					_List_fromArray(
+						[
+							_Utils_update(
+							event,
+							{title: input})
+						]));
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{events: updatedEvents}),
+					$elm$core$Platform$Cmd$none);
+			case 'UserRemovedNewEventFocus':
+				var event = msg.a;
+				return _Utils_Tuple2(
+					A3($author$project$Main$modifyModelEventEditing, model, event, false),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var event = msg.a;
+				return _Utils_Tuple2(
+					A3($author$project$Main$modifyModelEventEditing, model, event, true),
+					$elm$core$Platform$Cmd$none);
+		}
+	});
+var $author$project$Main$updateWithStorage = F2(
+	function (msg, oldModel) {
+		var _v0 = A2($author$project$Main$update, msg, oldModel);
+		var newModel = _v0.a;
+		var cmds = _v0.b;
+		return _Utils_Tuple2(
+			newModel,
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						$author$project$Main$setStorage(
+						$author$project$Main$eventsEncode(newModel.events)),
+						cmds
+					])));
+	});
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $elm$browser$Browser$Document = F2(
+	function (title, body) {
+		return {body: body, title: title};
+	});
+var $elm$html$Html$Attributes$stringProperty = F2(
+	function (key, string) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$string(string));
+	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$div = _VirtualDom_node('div');
 var $author$project$Date$dateCompare = F2(
 	function (a, b) {
 		return $elm$time$Time$posixToMillis(
@@ -5433,7 +5639,6 @@ var $author$project$Date$getYear = function (_v0) {
 	var y = _v0.a;
 	return y;
 };
-var $elm$core$Basics$ge = _Utils_ge;
 var $author$project$Main$isEventFuture = F2(
 	function (today, event) {
 		return A2($author$project$Date$dateCompare, event.start, today) >= 0;
@@ -5566,7 +5771,6 @@ var $elm$json$Json$Decode$at = F2(
 	function (fields, decoder) {
 		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
 	});
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $elm$html$Html$Events$targetValue = A2(
 	$elm$json$Json$Decode$at,
 	_List_fromArray(
@@ -5695,117 +5899,6 @@ var $author$project$Main$viewEvents = function (model) {
 var $elm$html$Html$table = _VirtualDom_node('table');
 var $elm$html$Html$th = _VirtualDom_node('th');
 var $elm$html$Html$tr = _VirtualDom_node('tr');
-var $elm$time$Time$flooredDiv = F2(
-	function (numerator, denominator) {
-		return $elm$core$Basics$floor(numerator / denominator);
-	});
-var $elm$time$Time$toAdjustedMinutesHelp = F3(
-	function (defaultOffset, posixMinutes, eras) {
-		toAdjustedMinutesHelp:
-		while (true) {
-			if (!eras.b) {
-				return posixMinutes + defaultOffset;
-			} else {
-				var era = eras.a;
-				var olderEras = eras.b;
-				if (_Utils_cmp(era.start, posixMinutes) < 0) {
-					return posixMinutes + era.offset;
-				} else {
-					var $temp$defaultOffset = defaultOffset,
-						$temp$posixMinutes = posixMinutes,
-						$temp$eras = olderEras;
-					defaultOffset = $temp$defaultOffset;
-					posixMinutes = $temp$posixMinutes;
-					eras = $temp$eras;
-					continue toAdjustedMinutesHelp;
-				}
-			}
-		}
-	});
-var $elm$time$Time$toAdjustedMinutes = F2(
-	function (_v0, time) {
-		var defaultOffset = _v0.a;
-		var eras = _v0.b;
-		return A3(
-			$elm$time$Time$toAdjustedMinutesHelp,
-			defaultOffset,
-			A2(
-				$elm$time$Time$flooredDiv,
-				$elm$time$Time$posixToMillis(time),
-				60000),
-			eras);
-	});
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $elm$time$Time$toCivil = function (minutes) {
-	var rawDay = A2($elm$time$Time$flooredDiv, minutes, 60 * 24) + 719468;
-	var era = (((rawDay >= 0) ? rawDay : (rawDay - 146096)) / 146097) | 0;
-	var dayOfEra = rawDay - (era * 146097);
-	var yearOfEra = ((((dayOfEra - ((dayOfEra / 1460) | 0)) + ((dayOfEra / 36524) | 0)) - ((dayOfEra / 146096) | 0)) / 365) | 0;
-	var dayOfYear = dayOfEra - (((365 * yearOfEra) + ((yearOfEra / 4) | 0)) - ((yearOfEra / 100) | 0));
-	var mp = (((5 * dayOfYear) + 2) / 153) | 0;
-	var month = mp + ((mp < 10) ? 3 : (-9));
-	var year = yearOfEra + (era * 400);
-	return {
-		day: (dayOfYear - ((((153 * mp) + 2) / 5) | 0)) + 1,
-		month: month,
-		year: year + ((month <= 2) ? 1 : 0)
-	};
-};
-var $elm$time$Time$toDay = F2(
-	function (zone, time) {
-		return $elm$time$Time$toCivil(
-			A2($elm$time$Time$toAdjustedMinutes, zone, time)).day;
-	});
-var $elm$time$Time$toMonth = F2(
-	function (zone, time) {
-		var _v0 = $elm$time$Time$toCivil(
-			A2($elm$time$Time$toAdjustedMinutes, zone, time)).month;
-		switch (_v0) {
-			case 1:
-				return $elm$time$Time$Jan;
-			case 2:
-				return $elm$time$Time$Feb;
-			case 3:
-				return $elm$time$Time$Mar;
-			case 4:
-				return $elm$time$Time$Apr;
-			case 5:
-				return $elm$time$Time$May;
-			case 6:
-				return $elm$time$Time$Jun;
-			case 7:
-				return $elm$time$Time$Jul;
-			case 8:
-				return $elm$time$Time$Aug;
-			case 9:
-				return $elm$time$Time$Sep;
-			case 10:
-				return $elm$time$Time$Oct;
-			case 11:
-				return $elm$time$Time$Nov;
-			default:
-				return $elm$time$Time$Dec;
-		}
-	});
-var $elm$time$Time$toYear = F2(
-	function (zone, time) {
-		return $elm$time$Time$toCivil(
-			A2($elm$time$Time$toAdjustedMinutes, zone, time)).year;
-	});
-var $elm$time$Time$Zone = F2(
-	function (a, b) {
-		return {$: 'Zone', a: a, b: b};
-	});
-var $elm$time$Time$utc = A2($elm$time$Time$Zone, 0, _List_Nil);
-var $author$project$Date$fromPosix = function (posix) {
-	return A3(
-		$author$project$Date$Date,
-		A2($elm$time$Time$toYear, $elm$time$Time$utc, posix),
-		A2($elm$time$Time$toMonth, $elm$time$Time$utc, posix),
-		A2($elm$time$Time$toDay, $elm$time$Time$utc, posix));
-};
 var $author$project$Date$addDay = F2(
 	function (d, add) {
 		return $author$project$Date$fromPosix(
@@ -6136,7 +6229,7 @@ var $author$project$Main$main = $elm$browser$Browser$document(
 		subscriptions: function (model) {
 			return $elm$core$Platform$Sub$none;
 		},
-		update: $author$project$Main$update,
+		update: $author$project$Main$updateWithStorage,
 		view: $author$project$Main$view
 	});
 _Platform_export({'Main':{'init':$author$project$Main$main(
@@ -6148,11 +6241,16 @@ _Platform_export({'Main':{'init':$author$project$Main$main(
 				function (month) {
 					return A2(
 						$elm$json$Json$Decode$andThen,
-						function (day) {
-							return $elm$json$Json$Decode$succeed(
-								{day: day, month: month, year: year});
+						function (events) {
+							return A2(
+								$elm$json$Json$Decode$andThen,
+								function (day) {
+									return $elm$json$Json$Decode$succeed(
+										{day: day, events: events, month: month, year: year});
+								},
+								A2($elm$json$Json$Decode$field, 'day', $elm$json$Json$Decode$int));
 						},
-						A2($elm$json$Json$Decode$field, 'day', $elm$json$Json$Decode$int));
+						A2($elm$json$Json$Decode$field, 'events', $elm$json$Json$Decode$value));
 				},
 				A2($elm$json$Json$Decode$field, 'month', $elm$json$Json$Decode$int));
 		},
