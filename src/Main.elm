@@ -26,12 +26,14 @@ port setStorage : E.Value -> Cmd msg
 
 -- MODEL
 
+type FieldBeingEdited =
+    None | Title | Duration
 
 type alias Event =
     { start: Date
     , durationInDays: Int
     , title: String
-    , editing: Bool
+    , editing: FieldBeingEdited
     }
 
 
@@ -78,7 +80,7 @@ eventDecoder =
         (D.field "start" dateDecoder)
         (D.field "durationInDays" D.int)
         (D.field "title" D.string)
-        (D.field "editing" D.bool)
+        (D.field "editing" D.string |> D.andThen editingDecoder)
 
 
 dateDecoder : D.Decoder Date
@@ -89,6 +91,22 @@ dateDecoder =
 dateEncode : Date -> E.Value
 dateEncode date =
     E.int (date |> toPosix |> posixToMillis)
+
+
+editingDecoder : String -> D.Decoder FieldBeingEdited
+editingDecoder tag =
+    case tag of
+        "none" -> D.succeed None
+        "title" -> D.succeed Title
+        "duration" -> D.succeed Duration
+        _ -> D.fail ( tag ++ " is not a recognise tag for FieldBeingEdited.")
+
+editingEncode : FieldBeingEdited -> E.Value
+editingEncode editing =
+    case editing of
+        None -> E.string "none"
+        Title -> E.string "title"
+        Duration -> E.string "duration"
 
 
 eventsEncode : List Event -> E.Value
@@ -102,7 +120,7 @@ eventEncode event =
         [ ("start", dateEncode event.start)
         , ("durationInDays", E.int event.durationInDays)
         , ("title", E.string event.title)
-        , ("editing", E.bool event.editing)
+        , ("editing", editingEncode event.editing)
         ]
 
 
@@ -112,27 +130,26 @@ eventEncode event =
 type Msg
     = UserClickedOnDate Date
     | UserDeletedEvent Event
-    | UserTypedInNewEvent Event String
-    | UserRemovedNewEventFocus Event
-    | UserClickedEventTitle Event
+    | UserTypedInNewTitle Event String
+    | UserRemovedNewTitleFocus Event
+    | UserClickedTitle Event
+    | UserClickedDuration Event
+    | UserTypedInNewDuration Event String
+    | UserRemovedNewDurationFocus Event
 
 
 eventsNotEqual : Event -> Event -> Bool
 eventsNotEqual a b =
     ( a.start, a.title, a.durationInDays ) /= ( b.start, b.title, b.durationInDays )
 
-modifyModelEventEditing : Model -> Event -> Bool -> Model
+
+modifyModelEventEditing : Model -> Event -> FieldBeingEdited -> Model
 modifyModelEventEditing model event newValue =
     let
         updatedEvents =
             List.append
                 (List.filter (\e -> eventsNotEqual e event) model.events)
                 [{ event | editing = newValue }]
-        _ = Debug.log "1>>" model.events
-        _ = Debug.log "e>>" event
-        _ = Debug.log "v>>" newValue
-        _ = Debug.log "2>>" updatedEvents
-
     in
         { model | events = updatedEvents }
 
@@ -158,7 +175,12 @@ update msg model =
         UserClickedOnDate date ->
             let
                 newEvent: Event
-                newEvent = { start = date, durationInDays = 1, title = "new event", editing = False }
+                newEvent =
+                    { start = date
+                    , durationInDays = 1
+                    , title = "new event"
+                    , editing = None
+                    }
             in
             ({model | events = List.append [newEvent] model.events}, Cmd.none)
 
@@ -166,7 +188,8 @@ update msg model =
             ( { model | events = List.filter (\e -> eventsNotEqual e eventToDelete) model.events }
             , Cmd.none
             )
-        UserTypedInNewEvent event input ->
+
+        UserTypedInNewTitle event input ->
             let
                 updatedEvents =
                     List.append
@@ -175,12 +198,36 @@ update msg model =
             in
             ({ model | events = updatedEvents }, Cmd.none )
 
-        UserRemovedNewEventFocus event ->
-            ( modifyModelEventEditing model event False, Cmd.none )
+        UserRemovedNewTitleFocus event ->
+            ( modifyModelEventEditing model event None, Cmd.none )
 
-        UserClickedEventTitle event ->
-            ( modifyModelEventEditing model event True, Cmd.none )
+        UserRemovedNewDurationFocus event ->
+            ( modifyModelEventEditing model event None, Cmd.none )
+
+        UserClickedTitle event ->
+            ( modifyModelEventEditing model event Title, Cmd.none )
+
+        UserTypedInNewDuration event newDurationString ->
+            let
+                newDuration =
+                    case String.toInt newDurationString of
+                        Just value -> value
+                        Nothing -> 1
+
+                updatedEvents =
+                    List.append
+                        (List.filter (\e -> eventsNotEqual e event) model.events)
+                        [{ event | durationInDays = newDuration }]
+            in
+            ({ model | events = updatedEvents }, Cmd.none )
+
+
+        UserClickedDuration event ->
+            ( modifyModelEventEditing model event Duration, Cmd.none )
+
+
 -- VIEW
+
 
 viewCalendarCell: Model -> Date -> Html Msg
 viewCalendarCell model date =
@@ -288,23 +335,43 @@ viewYear model =
 viewEvent : Event -> Html Msg
 viewEvent event =
     let
-        html =
-            if event.editing then
-                input
-                    [ onEnter (UserRemovedNewEventFocus event)
-                    , onInput (UserTypedInNewEvent event)
-                    , onBlur (UserRemovedNewEventFocus event)
-                    , value event.title
+        titleHtml =
+            case event.editing of
+                Title ->
+                    input
+                        [ value event.title
+                        , onInput (UserTypedInNewTitle event)
+                        , onEnter (UserRemovedNewTitleFocus event)
+                        , onBlur (UserRemovedNewTitleFocus event)
+                        ]
+                        []
+                _ ->
+                    span
+                    [ onClick (UserClickedTitle event) ]
+                    [ event.title |> text ]
+
+        durationHtml =
+            case event.editing of
+                Duration ->
+                    input
+                    [ value (String.fromInt event.durationInDays)
+                    , onInput (UserTypedInNewDuration event)
+                    , onEnter (UserRemovedNewDurationFocus event)
+                    , onBlur (UserRemovedNewDurationFocus event)
                     ]
                     []
-            else
-                span
-                  [ onClick (UserClickedEventTitle event) ]
-                  [ event.title |> text ]
+                _ ->
+                    event.durationInDays |> String.fromInt |> text
     in
     li []
-        [ span [] [ (formatShort event.start) ++ ": " |> text ]
-        , html
+        [ span [] [ formatShort event.start |> text]
+        , span
+              [ onClick (UserClickedDuration event) ]
+              [ " (" |> text
+              , durationHtml
+              , " days): " |> text
+              ]
+        , titleHtml
         , button [ onClick (UserDeletedEvent event) ] [ text "X" ]
         ]
 
