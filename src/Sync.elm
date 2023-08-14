@@ -18,7 +18,7 @@ eventDecoder =
         (Json.Decode.field "start" dateDecoder)
         (Json.Decode.field "durationInDays" Json.Decode.int)
         (Json.Decode.field "title" Json.Decode.string)
-        (Json.Decode.field "editing" Json.Decode.string |> Json.Decode.andThen editingDecoder)
+        (Json.Decode.succeed None)
 
 
 dateDecoder : Json.Decode.Decoder Date
@@ -29,23 +29,6 @@ dateDecoder =
 dateEncode : Date -> Json.Encode.Value
 dateEncode date =
     Json.Encode.int (date |> toPosix |> posixToMillis)
-
-
-editingDecoder : String -> Json.Decode.Decoder FieldBeingEdited
-editingDecoder tag =
-    case tag of
-        "none" -> Json.Decode.succeed None
-        "title" -> Json.Decode.succeed Title
-        "duration" -> Json.Decode.succeed Duration
-        _ -> Json.Decode.fail ( tag ++ " is not a recognise tag for FieldBeingEdited.")
-
-
-editingEncode : FieldBeingEdited -> Json.Encode.Value
-editingEncode editing =
-    case editing of
-        None -> Json.Encode.string "none"
-        Title -> Json.Encode.string "title"
-        Duration -> Json.Encode.string "duration"
 
 
 eventsEncode : List Event -> Json.Encode.Value
@@ -59,5 +42,4 @@ eventEncode event =
         [ ("start", dateEncode event.start)
         , ("durationInDays", Json.Encode.int event.durationInDays)
         , ("title", Json.Encode.string event.title)
-        , ("editing", editingEncode event.editing)
         ]
