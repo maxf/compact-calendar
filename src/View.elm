@@ -6,7 +6,7 @@ import Html.Attributes exposing (title, class, style, value)
 import Html.Events exposing (onClick, onInput, onBlur, keyCode, on)
 import Html.Events.Extra exposing (onEnter)
 import Time exposing (Month(..), Weekday(..))
-import Date exposing (Date(..), getYear, getDow, firstDateOfWeekZero, addDay, getDay, dateCompare, millisInDay, format, fromMonth, formatShort)
+import Date exposing (Date(..), getYear, getDow, firstDateOfWeekZero, addDay, getDay, dateCompare, millisInDay, format, fromMonth, formatShort, dateCompare)
 import Types exposing (Msg(..), FieldBeingEdited(..), Event, Model)
 
 
@@ -16,6 +16,31 @@ eventSortCompare a b =
         diff = dateCompare a.start b.start
     in
         if diff < 0 then LT else if diff == 0 then EQ else GT
+
+
+isEventOnThisDay : Date -> Event -> Bool
+isEventOnThisDay date event =
+    let
+        dateIsAfterEventStart =
+            dateCompare date event.start >= 0
+        dateIsBeforeEventEnd =
+            dateCompare date (addDay event.start event.durationInDays) <= 0
+    in
+        dateIsAfterEventStart && dateIsBeforeEventEnd
+
+
+nbMultipleDayEventsOnThisDay : List Event -> Date -> Int
+nbMultipleDayEventsOnThisDay events date =
+    events
+        |> List.filter (\e -> isEventOnThisDay date e && e.durationInDays > 1)
+        |> List.length
+
+
+nbSingleDayEventsOnThisDay : List Event -> Date -> Int
+nbSingleDayEventsOnThisDay events date =
+    events
+        |> List.filter (\e -> e.start == date && e.durationInDays == 1)
+        |> List.length
 
 
 viewCalendarCell: Model -> Date -> Html Msg
@@ -38,8 +63,12 @@ viewCalendarCell model date =
             else
                 ""
 
-        eventsOnThisDaysClass =
-            if List.length (List.filter (\e -> e.start == date) model.events) > 0 then "events" else ""
+        singleDayEventsOnThisDaysClass =
+            if nbSingleDayEventsOnThisDay model.events date > 0 then "single-events" else ""
+
+        multipleDayEventsOnThisDaysClass =
+            if nbMultipleDayEventsOnThisDay model.events date > 0 then "multi-events" else ""
+
 
         cellClass =
             String.join " "
@@ -57,7 +86,7 @@ viewCalendarCell model date =
         , onClick (UserClickedOnDate date)
         ]
         [ div
-              [ class eventsOnThisDaysClass ]
+              [ class (singleDayEventsOnThisDaysClass ++ " " ++ multipleDayEventsOnThisDaysClass) ]
               [ date |> getDay |> String.fromInt |> text ]
         ]
 
