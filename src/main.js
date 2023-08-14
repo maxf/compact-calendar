@@ -5166,7 +5166,7 @@ var $author$project$Date$Date = F3(
 		return {$: 'Date', a: a, b: b, c: c};
 	});
 var $elm$json$Json$Decode$decodeValue = _Json_run;
-var $author$project$Main$Event = F4(
+var $author$project$Types$Event = F4(
 	function (start, durationInDays, title, editing) {
 		return {durationInDays: durationInDays, editing: editing, start: start, title: title};
 	});
@@ -5308,40 +5308,40 @@ var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
 var $elm$time$Time$millisToPosix = $elm$time$Time$Posix;
-var $author$project$Main$dateDecoder = A2(
+var $author$project$Sync$dateDecoder = A2(
 	$elm$json$Json$Decode$map,
 	A2($elm$core$Basics$composeL, $author$project$Date$fromPosix, $elm$time$Time$millisToPosix),
 	$elm$json$Json$Decode$int);
-var $author$project$Main$Duration = {$: 'Duration'};
-var $author$project$Main$None = {$: 'None'};
-var $author$project$Main$Title = {$: 'Title'};
+var $author$project$Types$Duration = {$: 'Duration'};
+var $author$project$Types$None = {$: 'None'};
+var $author$project$Types$Title = {$: 'Title'};
 var $elm$json$Json$Decode$fail = _Json_fail;
-var $author$project$Main$editingDecoder = function (tag) {
+var $author$project$Sync$editingDecoder = function (tag) {
 	switch (tag) {
 		case 'none':
-			return $elm$json$Json$Decode$succeed($author$project$Main$None);
+			return $elm$json$Json$Decode$succeed($author$project$Types$None);
 		case 'title':
-			return $elm$json$Json$Decode$succeed($author$project$Main$Title);
+			return $elm$json$Json$Decode$succeed($author$project$Types$Title);
 		case 'duration':
-			return $elm$json$Json$Decode$succeed($author$project$Main$Duration);
+			return $elm$json$Json$Decode$succeed($author$project$Types$Duration);
 		default:
 			return $elm$json$Json$Decode$fail(tag + ' is not a recognise tag for FieldBeingEdited.');
 	}
 };
 var $elm$json$Json$Decode$map4 = _Json_map4;
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Main$eventDecoder = A5(
+var $author$project$Sync$eventDecoder = A5(
 	$elm$json$Json$Decode$map4,
-	$author$project$Main$Event,
-	A2($elm$json$Json$Decode$field, 'start', $author$project$Main$dateDecoder),
+	$author$project$Types$Event,
+	A2($elm$json$Json$Decode$field, 'start', $author$project$Sync$dateDecoder),
 	A2($elm$json$Json$Decode$field, 'durationInDays', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'title', $elm$json$Json$Decode$string),
 	A2(
 		$elm$json$Json$Decode$andThen,
-		$author$project$Main$editingDecoder,
+		$author$project$Sync$editingDecoder,
 		A2($elm$json$Json$Decode$field, 'editing', $elm$json$Json$Decode$string)));
 var $elm$json$Json$Decode$list = _Json_decodeList;
-var $author$project$Main$eventsDecoder = $elm$json$Json$Decode$list($author$project$Main$eventDecoder);
+var $author$project$Sync$eventsDecoder = $elm$json$Json$Decode$list($author$project$Sync$eventDecoder);
 var $elm$core$Debug$log = _Debug_log;
 var $author$project$Date$monthFromNum = function (n) {
 	switch (n) {
@@ -5376,7 +5376,7 @@ var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Main$init = function (flags) {
 	var initialModel = {
 		events: function () {
-			var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$Main$eventsDecoder, flags.events);
+			var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$Sync$eventsDecoder, flags.events);
 			if (_v0.$ === 'Ok') {
 				var events = _v0.a;
 				return events;
@@ -5447,13 +5447,13 @@ var $author$project$Date$toPosix = function (_v0) {
 	var epoch = (days - 719050) * $author$project$Date$millisInDay;
 	return $elm$time$Time$millisToPosix(epoch);
 };
-var $author$project$Main$dateEncode = function (date) {
+var $author$project$Sync$dateEncode = function (date) {
 	return $elm$json$Json$Encode$int(
 		$elm$time$Time$posixToMillis(
 			$author$project$Date$toPosix(date)));
 };
 var $elm$json$Json$Encode$string = _Json_wrap;
-var $author$project$Main$editingEncode = function (editing) {
+var $author$project$Sync$editingEncode = function (editing) {
 	switch (editing.$) {
 		case 'None':
 			return $elm$json$Json$Encode$string('none');
@@ -5476,13 +5476,13 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			_Json_emptyObject(_Utils_Tuple0),
 			pairs));
 };
-var $author$project$Main$eventEncode = function (event) {
+var $author$project$Sync$eventEncode = function (event) {
 	return $elm$json$Json$Encode$object(
 		_List_fromArray(
 			[
 				_Utils_Tuple2(
 				'start',
-				$author$project$Main$dateEncode(event.start)),
+				$author$project$Sync$dateEncode(event.start)),
 				_Utils_Tuple2(
 				'durationInDays',
 				$elm$json$Json$Encode$int(event.durationInDays)),
@@ -5491,7 +5491,7 @@ var $author$project$Main$eventEncode = function (event) {
 				$elm$json$Json$Encode$string(event.title)),
 				_Utils_Tuple2(
 				'editing',
-				$author$project$Main$editingEncode(event.editing))
+				$author$project$Sync$editingEncode(event.editing))
 			]));
 };
 var $elm$json$Json$Encode$list = F2(
@@ -5503,8 +5503,8 @@ var $elm$json$Json$Encode$list = F2(
 				_Json_emptyArray(_Utils_Tuple0),
 				entries));
 	});
-var $author$project$Main$eventsEncode = function (events) {
-	return A2($elm$json$Json$Encode$list, $author$project$Main$eventEncode, events);
+var $author$project$Sync$eventsEncode = function (events) {
+	return A2($elm$json$Json$Encode$list, $author$project$Sync$eventEncode, events);
 };
 var $author$project$Main$setStorage = _Platform_outgoingPort('setStorage', $elm$core$Basics$identity);
 var $elm$core$List$append = F2(
@@ -5557,7 +5557,7 @@ var $author$project$Main$update = F2(
 		switch (msg.$) {
 			case 'UserClickedOnDate':
 				var date = msg.a;
-				var newEvent = {durationInDays: 1, editing: $author$project$Main$None, start: date, title: 'new event'};
+				var newEvent = {durationInDays: 1, editing: $author$project$Types$None, start: date, title: 'new event'};
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -5608,17 +5608,17 @@ var $author$project$Main$update = F2(
 			case 'UserRemovedNewTitleFocus':
 				var event = msg.a;
 				return _Utils_Tuple2(
-					A3($author$project$Main$modifyModelEventEditing, model, event, $author$project$Main$None),
+					A3($author$project$Main$modifyModelEventEditing, model, event, $author$project$Types$None),
 					$elm$core$Platform$Cmd$none);
 			case 'UserRemovedNewDurationFocus':
 				var event = msg.a;
 				return _Utils_Tuple2(
-					A3($author$project$Main$modifyModelEventEditing, model, event, $author$project$Main$None),
+					A3($author$project$Main$modifyModelEventEditing, model, event, $author$project$Types$None),
 					$elm$core$Platform$Cmd$none);
 			case 'UserClickedTitle':
 				var event = msg.a;
 				return _Utils_Tuple2(
-					A3($author$project$Main$modifyModelEventEditing, model, event, $author$project$Main$Title),
+					A3($author$project$Main$modifyModelEventEditing, model, event, $author$project$Types$Title),
 					$elm$core$Platform$Cmd$none);
 			case 'UserTypedInNewDuration':
 				var event = msg.a;
@@ -5654,7 +5654,7 @@ var $author$project$Main$update = F2(
 			default:
 				var event = msg.a;
 				return _Utils_Tuple2(
-					A3($author$project$Main$modifyModelEventEditing, model, event, $author$project$Main$Duration),
+					A3($author$project$Main$modifyModelEventEditing, model, event, $author$project$Types$Duration),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -5669,7 +5669,7 @@ var $author$project$Main$updateWithStorage = F2(
 				_List_fromArray(
 					[
 						$author$project$Main$setStorage(
-						$author$project$Main$eventsEncode(newModel.events)),
+						$author$project$Sync$eventsEncode(newModel.events)),
 						cmds
 					])));
 	});
@@ -5694,7 +5694,7 @@ var $author$project$Date$dateCompare = F2(
 			$author$project$Date$toPosix(b));
 	});
 var $elm$html$Html$details = _VirtualDom_node('details');
-var $author$project$Main$eventSortCompare = F2(
+var $author$project$View$eventSortCompare = F2(
 	function (a, b) {
 		var diff = A2($author$project$Date$dateCompare, a.start, b.start);
 		return (diff < 0) ? $elm$core$Basics$LT : ((!diff) ? $elm$core$Basics$EQ : $elm$core$Basics$GT);
@@ -5703,11 +5703,11 @@ var $author$project$Date$getYear = function (_v0) {
 	var y = _v0.a;
 	return y;
 };
-var $author$project$Main$isEventFuture = F2(
+var $author$project$View$isEventFuture = F2(
 	function (today, event) {
 		return A2($author$project$Date$dateCompare, event.start, today) >= 0;
 	});
-var $author$project$Main$isEventPast = F2(
+var $author$project$View$isEventPast = F2(
 	function (today, event) {
 		return A2($author$project$Date$dateCompare, event.start, today) < 0;
 	});
@@ -5718,26 +5718,26 @@ var $elm$html$Html$summary = _VirtualDom_node('summary');
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var $elm$html$Html$text = $elm$virtual_dom$VirtualDom$text;
 var $elm$html$Html$ul = _VirtualDom_node('ul');
-var $author$project$Main$UserClickedDuration = function (a) {
+var $author$project$Types$UserClickedDuration = function (a) {
 	return {$: 'UserClickedDuration', a: a};
 };
-var $author$project$Main$UserClickedTitle = function (a) {
+var $author$project$Types$UserClickedTitle = function (a) {
 	return {$: 'UserClickedTitle', a: a};
 };
-var $author$project$Main$UserDeletedEvent = function (a) {
+var $author$project$Types$UserDeletedEvent = function (a) {
 	return {$: 'UserDeletedEvent', a: a};
 };
-var $author$project$Main$UserRemovedNewDurationFocus = function (a) {
+var $author$project$Types$UserRemovedNewDurationFocus = function (a) {
 	return {$: 'UserRemovedNewDurationFocus', a: a};
 };
-var $author$project$Main$UserRemovedNewTitleFocus = function (a) {
+var $author$project$Types$UserRemovedNewTitleFocus = function (a) {
 	return {$: 'UserRemovedNewTitleFocus', a: a};
 };
-var $author$project$Main$UserTypedInNewDuration = F2(
+var $author$project$Types$UserTypedInNewDuration = F2(
 	function (a, b) {
 		return {$: 'UserTypedInNewDuration', a: a, b: b};
 	});
-var $author$project$Main$UserTypedInNewTitle = F2(
+var $author$project$Types$UserTypedInNewTitle = F2(
 	function (a, b) {
 		return {$: 'UserTypedInNewTitle', a: a, b: b};
 	});
@@ -5860,7 +5860,7 @@ var $elm$html$Html$Events$onInput = function (tagger) {
 };
 var $elm$html$Html$span = _VirtualDom_node('span');
 var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
-var $author$project$Main$viewEvent = function (event) {
+var $author$project$View$viewEvent = function (event) {
 	var titleHtml = function () {
 		var _v1 = event.editing;
 		if (_v1.$ === 'Title') {
@@ -5870,11 +5870,11 @@ var $author$project$Main$viewEvent = function (event) {
 					[
 						$elm$html$Html$Attributes$value(event.title),
 						$elm$html$Html$Events$onInput(
-						$author$project$Main$UserTypedInNewTitle(event)),
+						$author$project$Types$UserTypedInNewTitle(event)),
 						$elm_community$html_extra$Html$Events$Extra$onEnter(
-						$author$project$Main$UserRemovedNewTitleFocus(event)),
+						$author$project$Types$UserRemovedNewTitleFocus(event)),
 						$elm$html$Html$Events$onBlur(
-						$author$project$Main$UserRemovedNewTitleFocus(event))
+						$author$project$Types$UserRemovedNewTitleFocus(event))
 					]),
 				_List_Nil);
 		} else {
@@ -5883,7 +5883,7 @@ var $author$project$Main$viewEvent = function (event) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Events$onClick(
-						$author$project$Main$UserClickedTitle(event))
+						$author$project$Types$UserClickedTitle(event))
 					]),
 				_List_fromArray(
 					[
@@ -5901,11 +5901,11 @@ var $author$project$Main$viewEvent = function (event) {
 						$elm$html$Html$Attributes$value(
 						$elm$core$String$fromInt(event.durationInDays)),
 						$elm$html$Html$Events$onInput(
-						$author$project$Main$UserTypedInNewDuration(event)),
+						$author$project$Types$UserTypedInNewDuration(event)),
 						$elm_community$html_extra$Html$Events$Extra$onEnter(
-						$author$project$Main$UserRemovedNewDurationFocus(event)),
+						$author$project$Types$UserRemovedNewDurationFocus(event)),
 						$elm$html$Html$Events$onBlur(
-						$author$project$Main$UserRemovedNewDurationFocus(event))
+						$author$project$Types$UserRemovedNewDurationFocus(event))
 					]),
 				_List_Nil);
 		} else {
@@ -5931,7 +5931,7 @@ var $author$project$Main$viewEvent = function (event) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Events$onClick(
-						$author$project$Main$UserClickedDuration(event))
+						$author$project$Types$UserClickedDuration(event))
 					]),
 				_List_fromArray(
 					[
@@ -5945,7 +5945,7 @@ var $author$project$Main$viewEvent = function (event) {
 				_List_fromArray(
 					[
 						$elm$html$Html$Events$onClick(
-						$author$project$Main$UserDeletedEvent(event))
+						$author$project$Types$UserDeletedEvent(event))
 					]),
 				_List_fromArray(
 					[
@@ -5953,20 +5953,20 @@ var $author$project$Main$viewEvent = function (event) {
 					]))
 			]));
 };
-var $author$project$Main$viewEvents = function (model) {
+var $author$project$View$viewEvents = function (model) {
 	var presentFutureEvents = A2(
 		$elm$core$List$sortWith,
-		$author$project$Main$eventSortCompare,
+		$author$project$View$eventSortCompare,
 		A2(
 			$elm$core$List$filter,
-			$author$project$Main$isEventFuture(model.today),
+			$author$project$View$isEventFuture(model.today),
 			model.events));
 	var pastEvents = A2(
 		$elm$core$List$sortWith,
-		$author$project$Main$eventSortCompare,
+		$author$project$View$eventSortCompare,
 		A2(
 			$elm$core$List$filter,
-			$author$project$Main$isEventPast(model.today),
+			$author$project$View$isEventPast(model.today),
 			model.events));
 	var offset = $elm$core$String$fromInt(
 		((((A2(
@@ -6003,12 +6003,12 @@ var $author$project$Main$viewEvents = function (model) {
 						A2(
 						$elm$html$Html$ul,
 						_List_Nil,
-						A2($elm$core$List$map, $author$project$Main$viewEvent, pastEvents))
+						A2($elm$core$List$map, $author$project$View$viewEvent, pastEvents))
 					])),
 				A2(
 				$elm$html$Html$ul,
 				_List_Nil,
-				A2($elm$core$List$map, $author$project$Main$viewEvent, presentFutureEvents))
+				A2($elm$core$List$map, $author$project$View$viewEvent, presentFutureEvents))
 			]));
 };
 var $elm$html$Html$table = _VirtualDom_node('table');
@@ -6116,7 +6116,7 @@ var $author$project$Date$getDay = function (_v0) {
 	return d;
 };
 var $elm$html$Html$td = _VirtualDom_node('td');
-var $author$project$Main$UserClickedOnDate = function (a) {
+var $author$project$Types$UserClickedOnDate = function (a) {
 	return {$: 'UserClickedOnDate', a: a};
 };
 var $author$project$Date$fromWeekday = function (weekday) {
@@ -6157,7 +6157,7 @@ var $author$project$Date$format = function (_v0) {
 			]));
 };
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
-var $author$project$Main$viewCalendarCell = F2(
+var $author$project$View$viewCalendarCell = F2(
 	function (model, date) {
 		var nextWeekDay = A2($author$project$Date$addDay, date, 7);
 		var monthClass = (_Utils_cmp(
@@ -6187,7 +6187,7 @@ var $author$project$Main$viewCalendarCell = F2(
 					$author$project$Date$format(date)),
 					$elm$html$Html$Attributes$class(cellClass),
 					$elm$html$Html$Events$onClick(
-					$author$project$Main$UserClickedOnDate(date))
+					$author$project$Types$UserClickedOnDate(date))
 				]),
 			_List_fromArray(
 				[
@@ -6205,7 +6205,7 @@ var $author$project$Main$viewCalendarCell = F2(
 						]))
 				]));
 	});
-var $author$project$Main$viewWeek = F2(
+var $author$project$View$viewWeek = F2(
 	function (model, weekNumber) {
 		var firstDateOf0 = $author$project$Date$firstDateOfWeekZero(
 			$author$project$Date$getYear(model.today));
@@ -6218,7 +6218,7 @@ var $author$project$Main$viewWeek = F2(
 			]) : _List_Nil;
 		var cellHtml = function (i) {
 			return A2(
-				$author$project$Main$viewCalendarCell,
+				$author$project$View$viewCalendarCell,
 				model,
 				A2($author$project$Date$addDay, firstDateOf0, (weekNumber * 7) + i));
 		};
@@ -6245,7 +6245,7 @@ var $author$project$Main$viewWeek = F2(
 						A2($elm$core$List$range, 0, 6))
 					])));
 	});
-var $author$project$Main$viewYear = function (model) {
+var $author$project$View$viewYear = function (model) {
 	return A2(
 		$elm$html$Html$table,
 		_List_Nil,
@@ -6318,10 +6318,10 @@ var $author$project$Main$viewYear = function (model) {
 				]),
 			A2(
 				$elm$core$List$map,
-				$author$project$Main$viewWeek(model),
+				$author$project$View$viewWeek(model),
 				A2($elm$core$List$range, 0, 52))));
 };
-var $author$project$Main$view = function (model) {
+var $author$project$View$view = function (model) {
 	var body = _List_fromArray(
 		[
 			A2(
@@ -6332,8 +6332,8 @@ var $author$project$Main$view = function (model) {
 				]),
 			_List_fromArray(
 				[
-					$author$project$Main$viewYear(model),
-					$author$project$Main$viewEvents(model)
+					$author$project$View$viewYear(model),
+					$author$project$View$viewEvents(model)
 				]))
 		]);
 	return A2($elm$browser$Browser$Document, 'Compact calendar', body);
@@ -6345,7 +6345,7 @@ var $author$project$Main$main = $elm$browser$Browser$document(
 			return $elm$core$Platform$Sub$none;
 		},
 		update: $author$project$Main$updateWithStorage,
-		view: $author$project$Main$view
+		view: $author$project$View$view
 	});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	A2(
