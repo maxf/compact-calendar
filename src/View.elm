@@ -154,9 +154,9 @@ viewEvent event =
     let
         titleHtml =
             case event.editing of
-                Title ->
+                Title tmpTitle ->
                     input
-                        [ value event.title
+                        [ value tmpTitle
                         , onInput (UserTypedInNewTitle event)
                         , onEnter (UserRemovedNewTitleFocus event)
                         , onBlur (UserRemovedNewTitleFocus event)
@@ -169,9 +169,9 @@ viewEvent event =
 
         durationHtml =
             case event.editing of
-                Duration ->
+                Duration tmpDuration ->
                     input
-                    [ value (String.fromInt event.durationInDays)
+                    [ value tmpDuration
                     , onInput (UserTypedInNewDuration event)
                     , onEnter (UserRemovedNewDurationFocus event)
                     , onBlur (UserRemovedNewDurationFocus event)
@@ -208,7 +208,8 @@ viewEvents model =
     let
         pastEvents = List.filter (isEventPast model.today) model.events |> List.sortWith eventSortCompare
         presentFutureEvents = List.filter (isEventFuture model.today) model.events  |> List.sortWith eventSortCompare
-        offset = dateCompare model.today (Date (getYear model.today) Jan 1) // millisInDay // 7 * 28 |> String.fromInt
+        offset = dateCompare model.today (Date (getYear model.today) Jan 1)
+                 // millisInDay // 7 * 28 |> String.fromInt
     in
         div [ class "events-pane", style "top" (offset ++ "px") ]
             [ details []
@@ -216,7 +217,6 @@ viewEvents model =
                         [ (String.fromInt (List.length pastEvents)) ++ " past events" |> text ]
                   , ul [] (List.map viewEvent pastEvents)
                   ]
-
         , ul []
             (List.map viewEvent presentFutureEvents)
         ]

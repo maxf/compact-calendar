@@ -14,7 +14,8 @@ eventsDecoder =
 
 eventDecoder : Json.Decode.Decoder Event
 eventDecoder =
-    Json.Decode.map4 Event
+    Json.Decode.map5 Event
+        (Json.Decode.field "id" Json.Decode.int)
         (Json.Decode.field "start" dateDecoder)
         (Json.Decode.field "durationInDays" Json.Decode.int)
         (Json.Decode.field "title" Json.Decode.string)
@@ -42,4 +43,5 @@ eventEncode event =
         [ ("start", dateEncode event.start)
         , ("durationInDays", Json.Encode.int event.durationInDays)
         , ("title", Json.Encode.string event.title)
+        , ("id", Json.Encode.int event.id)
         ]

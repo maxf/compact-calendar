@@ -39,21 +39,49 @@ init flags =
     (initialModel, Cmd.none)
 
 
-
-eventsNotEqual : Event -> Event -> Bool
-eventsNotEqual a b =
-    ( a.start, a.title, a.durationInDays ) /= ( b.start, b.title, b.durationInDays )
-
-
-modifyModelEventEditing : Model -> Event -> FieldBeingEdited -> Model
-modifyModelEventEditing model event newValue =
+replaceEvent : Model -> Event -> Event -> Model
+replaceEvent model oldEvent newEvent =
     let
-        updatedEvents =
+        newEvents =
             List.append
-                (List.filter (\e -> eventsNotEqual e event) model.events)
-                [{ event | editing = newValue }]
+                (List.filter (\e -> e.id /= oldEvent.id) model.events)
+                [ newEvent ]
     in
-        { model | events = updatedEvents }
+        { model | events = newEvents }
+
+
+setEventEditing : Model -> Event -> FieldBeingEdited -> Model
+setEventEditing model event field =
+    let
+        newEvent =
+            { event | editing = field }
+    in
+        replaceEvent model event newEvent
+
+
+clearEventEditing : Model -> Event -> Model
+clearEventEditing model event =
+    case event.editing of
+        Title tmpTitle ->
+            replaceEvent
+                model
+                event
+                { event | title = tmpTitle, editing = None }
+
+        Duration tmpDuration ->
+            let
+                newDuration =
+                    case String.toInt tmpDuration of
+                        Just val -> val
+                        Nothing -> 1
+            in
+            replaceEvent
+                model
+                event
+                { event | durationInDays = newDuration, editing = None }
+
+        None ->
+            model
 
 
 -- We want to `setStorage` on every update, so this function adds
@@ -71,6 +99,18 @@ updateWithStorage msg oldModel =
         )
 
 
+newEventId : List Event -> Int
+newEventId events =
+    let
+        maxId =
+            List.foldl
+                max
+                0
+                (List.map .id events)
+    in
+        maxId + 1
+
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
     case msg of
@@ -78,7 +118,8 @@ update msg model =
             let
                 newEvent: Event
                 newEvent =
-                    { start = date
+                    { id = newEventId model.events
+                    , start = date
                     , durationInDays = 1
                     , title = "new event"
                     , editing = None
@@ -87,7 +128,7 @@ update msg model =
             ({model | events = List.append [newEvent] model.events}, Cmd.none)
 
         UserDeletedEvent eventToDelete ->
-            ( { model | events = List.filter (\e -> eventsNotEqual e eventToDelete) model.events }
+            ( { model | events = List.filter (\e -> e.id /= eventToDelete.id) model.events }
             , Cmd.none
             )
 
@@ -95,19 +136,24 @@ update msg model =
             let
                 updatedEvents =
                     List.append
-                        (List.filter (\e -> eventsNotEqual e event) model.events)
-                        [{ event | title = input }]
+                        (List.filter (\e -> e.id /= event.id) model.events)
+                        [{ event | editing = Title input }]
             in
             ({ model | events = updatedEvents }, Cmd.none )
 
         UserRemovedNewTitleFocus event ->
-            ( modifyModelEventEditing model event None, Cmd.none )
+            ( clearEventEditing model event, Cmd.none )
 
         UserRemovedNewDurationFocus event ->
-            ( modifyModelEventEditing model event None, Cmd.none )
+            ( clearEventEditing model event, Cmd.none )
 
         UserClickedTitle event ->
-            ( modifyModelEventEditing model event Title, Cmd.none )
+            ( setEventEditing
+                  model
+                  event
+                  (Title event.title)
+            , Cmd.none
+            )
 
         UserTypedInNewDuration event newDurationString ->
             let
@@ -118,10 +164,15 @@ update msg model =
 
                 updatedEvents =
                     List.append
-                        (List.filter (\e -> eventsNotEqual e event) model.events)
-                        [{ event | durationInDays = newDuration }]
+                        (List.filter (\e -> e.id /= event.id) model.events)
+                        [{ event | editing = Duration newDurationString }]
             in
             ({ model | events = updatedEvents }, Cmd.none )
 
         UserClickedDuration event ->
-            ( modifyModelEventEditing model event Duration, Cmd.none )
+            ( setEventEditing
+                  model
+                  event
+                  (Duration (String.fromInt event.durationInDays))
+            , Cmd.none
+            )

@@ -2,7 +2,6 @@ module Types exposing (Msg(..), FieldBeingEdited(..), Event, Model)
 
 import Date exposing (Date(..))
 
-
 type Msg
     = UserClickedOnDate Date
     | UserDeletedEvent Event
@@ -14,12 +13,18 @@ type Msg
     | UserRemovedNewDurationFocus Event
 
 
-type FieldBeingEdited =
-    None | Title | Duration
+type FieldBeingEdited
+    = None
+    | Title String
+    | Duration String
+
+
+type alias EventId = Int
 
 
 type alias Event =
-    { start: Date
+    { id : EventId
+    , start: Date
     , durationInDays: Int
     , title: String
     , editing: FieldBeingEdited
