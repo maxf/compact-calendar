@@ -69,7 +69,6 @@ viewCalendarCell model date =
         multipleDayEventsOnThisDaysClass =
             if nbMultipleDayEventsOnThisDay model.events date > 0 then "multi-events" else ""
 
-
         cellClass =
             String.join " "
                 [ firstDayOfMonthClass
@@ -77,8 +76,6 @@ viewCalendarCell model date =
                 , monthClass
                 , dayIsPastClass
                 ]
-
-
     in
     td
         [ title (format date)
