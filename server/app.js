@@ -7,6 +7,8 @@ const app = express();
 const PORT = process.env.PORT || 8888;
 
 app.use(bodyParser.json());
+app.use(express.static('static'));
+
 
 // Create a MySQL connection pool
 const pool = mysql.createPool({
@@ -20,7 +22,7 @@ const pool = mysql.createPool({
 });
 
 // POST /events - Create a new event
-app.post('/events', (req, res) => {
+app.post('/api/events', (req, res) => {
     const event = req.body;
     pool.execute(
         'INSERT INTO events (start, duration, title) VALUES (?, ?, ?)',
@@ -37,7 +39,7 @@ app.post('/events', (req, res) => {
 });
 
 // GET /events - Get all events
-app.get('/events', (req, res) => {
+app.get('/api/events', (req, res) => {
     pool.query('SELECT * FROM events', (err, results) => {
         if (err) {
             res.status(500).json({ error: 'Database error' });
@@ -48,7 +50,7 @@ app.get('/events', (req, res) => {
 });
 
 // GET /events/:id - Get a specific event by its ID
-app.get('/events/:id', (req, res) => {
+app.get('/api/events/:id', (req, res) => {
     const eventId = req.params.id;
     pool.query('SELECT * FROM events WHERE id = ?', [eventId], (err, results) => {
         if (err) {
@@ -62,7 +64,7 @@ app.get('/events/:id', (req, res) => {
 });
 
 // PUT /events/:id - Update a specific event by its ID
-app.put('/events/:id', (req, res) => {
+app.put('/api/events/:id', (req, res) => {
     const eventId = req.params.id;
     const updatedEvent = req.body;
     pool.execute(
@@ -79,7 +81,7 @@ app.put('/events/:id', (req, res) => {
 });
 
 // DELETE /events/:id - Delete a specific event by its ID
-app.delete('/events/:id', (req, res) => {
+app.delete('/api/events/:id', (req, res) => {
     const eventId = req.params.id;
     pool.execute('DELETE FROM events WHERE id = ?', [eventId], (err, results) => {
         if (err) {
@@ -91,6 +93,17 @@ app.delete('/events/:id', (req, res) => {
         }
     });
 });
+
+// ======== INDEX ===========
+
+app.get('/', (req, res) => {
+  res.sendFile('index.html',  { root: __dirname + '/static'});
+});
+
+
+// ======== INDEX ===========
+
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
