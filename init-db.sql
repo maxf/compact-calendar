@@ -7,7 +7,7 @@ USE compact_calendar;
 
 CREATE TABLE events (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    start INT NOT NULL, -- unix timestamp
+    start BIGINT NOT NULL, -- unix timestamp in ms
     duration INT NOT NULL, -- in days
     title VARCHAR(1024) NOT NULL
 );

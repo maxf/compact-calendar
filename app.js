@@ -12,10 +12,10 @@ app.use(express.static('static'));
 
 // Create a MySQL connection pool
 const pool = mysql.createPool({
-  host: process.env.host,
-  user: process.env.user,
-  password: process.env.password,
-  database: process.env.database,
+  host: process.env.db_host,
+  user: process.env.db_user,
+  password: process.env.db_password,
+  database: process.env.db_database,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -23,19 +23,21 @@ const pool = mysql.createPool({
 
 // POST /events - Create a new event
 app.post('/api/events', (req, res) => {
-    const event = req.body;
-    pool.execute(
-        'INSERT INTO events (start, duration, title) VALUES (?, ?, ?)',
-        [event.start, event.duration, event.title],
-        (err, results) => {
-            if (err) {
-                res.status(500).json({ error: 'Database error' });
-            } else {
-                event.id = results.insertId;
-                res.status(201).json(event);
-            }
-        }
-    );
+  const event = req.body;
+  console.log('evnet', event)
+  pool.execute(
+    'INSERT INTO events (start, duration, title) VALUES (?, ?, ?)',
+    [event.start, event.duration, event.title],
+    (err, results) => {
+      if (err) {
+        console.log('err', err)
+        res.status(500).json({ error: 'Database error' });
+      } else {
+        event.id = results.insertId;
+        res.status(201).json(event);
+      }
+    }
+  );
 });
 
 // GET /events - Get all events

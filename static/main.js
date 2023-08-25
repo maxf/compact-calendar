@@ -5167,8 +5167,8 @@ var $author$project$Date$Date = F3(
 	});
 var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $author$project$Types$Event = F5(
-	function (id, start, durationInDays, title, editing) {
-		return {durationInDays: durationInDays, editing: editing, id: id, start: start, title: title};
+	function (id, start, duration, title, editing) {
+		return {duration: duration, editing: editing, id: id, start: start, title: title};
 	});
 var $author$project$Types$None = {$: 'None'};
 var $elm$core$Basics$composeL = F3(
@@ -5320,7 +5320,7 @@ var $author$project$Sync$eventDecoder = A6(
 	$author$project$Types$Event,
 	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'start', $author$project$Sync$dateDecoder),
-	A2($elm$json$Json$Decode$field, 'durationInDays', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'duration', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'title', $elm$json$Json$Decode$string),
 	$elm$json$Json$Decode$succeed($author$project$Types$None));
 var $elm$json$Json$Decode$list = _Json_decodeList;
@@ -5457,8 +5457,8 @@ var $author$project$Sync$eventEncode = function (event) {
 				'start',
 				$author$project$Sync$dateEncode(event.start)),
 				_Utils_Tuple2(
-				'durationInDays',
-				$elm$json$Json$Encode$int(event.durationInDays)),
+				'duration',
+				$elm$json$Json$Encode$int(event.duration)),
 				_Utils_Tuple2(
 				'title',
 				$elm$json$Json$Encode$string(event.title)),
@@ -5551,7 +5551,7 @@ var $author$project$Main$clearEventEditing = F2(
 					event,
 					_Utils_update(
 						event,
-						{durationInDays: newDuration, editing: $author$project$Types$None}));
+						{duration: newDuration, editing: $author$project$Types$None}));
 			default:
 				return model;
 		}
@@ -5582,7 +5582,7 @@ var $author$project$Main$update = F2(
 			case 'UserClickedOnDate':
 				var date = msg.a;
 				var newEvent = {
-					durationInDays: 1,
+					duration: 1,
 					editing: $author$project$Types$None,
 					id: $author$project$Main$newEventId(model.events),
 					start: date,
@@ -5697,7 +5697,7 @@ var $author$project$Main$update = F2(
 						model,
 						event,
 						$author$project$Types$Duration(
-							$elm$core$String$fromInt(event.durationInDays))),
+							$elm$core$String$fromInt(event.duration))),
 					$elm$core$Platform$Cmd$none);
 		}
 	});
@@ -5955,7 +5955,7 @@ var $author$project$View$viewEvent = function (event) {
 				_List_Nil);
 		} else {
 			return $elm$html$Html$text(
-				$elm$core$String$fromInt(event.durationInDays));
+				$elm$core$String$fromInt(event.duration));
 		}
 	}();
 	return A2(
@@ -6206,7 +6206,7 @@ var $author$project$View$isEventOnThisDay = F2(
 		var dateIsBeforeEventEnd = A2(
 			$author$project$Date$dateCompare,
 			date,
-			A2($author$project$Date$addDay, event.start, event.durationInDays)) <= 0;
+			A2($author$project$Date$addDay, event.start, event.duration)) <= 0;
 		var dateIsAfterEventStart = A2($author$project$Date$dateCompare, date, event.start) >= 0;
 		return dateIsAfterEventStart && dateIsBeforeEventEnd;
 	});
@@ -6216,7 +6216,7 @@ var $author$project$View$nbMultipleDayEventsOnThisDay = F2(
 			A2(
 				$elm$core$List$filter,
 				function (e) {
-					return A2($author$project$View$isEventOnThisDay, date, e) && (e.durationInDays > 1);
+					return A2($author$project$View$isEventOnThisDay, date, e) && (e.duration > 1);
 				},
 				events));
 	});
@@ -6226,7 +6226,7 @@ var $author$project$View$nbSingleDayEventsOnThisDay = F2(
 			A2(
 				$elm$core$List$filter,
 				function (e) {
-					return _Utils_eq(e.start, date) && (e.durationInDays === 1);
+					return _Utils_eq(e.start, date) && (e.duration === 1);
 				},
 				events));
 	});

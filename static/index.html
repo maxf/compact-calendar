@@ -77,6 +77,15 @@
    // Extract the stored data from previous sessions.
    var storedData = localStorage.getItem('events');
    var events = storedData ? JSON.parse(storedData) : null;
+   // Extract the stored data from previous sessions.
+   var storedData = localStorage.getItem('events');
+   console.log('got this from localStorage:', storedData);
+   if (Array.isArray(storedData) && storedData.length > 0) {
+     var events = JSON.parse(storedData);
+     console.log('events from LS', events)
+   } else {
+     var events = []
+   }
 
    console.log('events', events)
 
@@ -88,9 +97,20 @@
    });
 
    // Listen for commands from the `setStorage` port.
-   // Turn the data to a string and put it in localStorage.
-   app.ports.setStorage.subscribe(function(state) {
-     localStorage.setItem('events', JSON.stringify(state));
+   // Turn the data to a string and put it in localStorage and on the server
+   app.ports.setStorage.subscribe(async function(events) {
+     localStorage.setItem('events', JSON.stringify(events));
+     console.log("EVENTS", events)
+     for (event of events) {
+       console.log('posting event', event)
+       await fetch('/api/events', {
+         method: "POST",
+         headers: {
+           'Content-Type': 'application/json'
+         },
+         body: JSON.stringify(event)
+       });
+     }
    });
   </script>
 </body>

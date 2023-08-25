@@ -25,7 +25,7 @@ type alias EventId = Int
 type alias Event =
     { id : EventId
     , start: Date
-    , durationInDays: Int
+    , duration: Int
     , title: String
     , editing: FieldBeingEdited
     }

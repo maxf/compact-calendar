@@ -1,5 +1,5 @@
 build-watch:
-	cd src && ls *.elm | entr -rc sh -c "elm make Main.elm --output=main.js && cp index.html main.js ../server/static"
+	cd src && ls *.elm | entr -rc sh -c "elm make Main.elm --output=main.js && cp main.js ../static"
 
 run:
-	node app.js
+	npx nodemon app.js

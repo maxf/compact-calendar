@@ -24,7 +24,7 @@ isEventOnThisDay date event =
         dateIsAfterEventStart =
             dateCompare date event.start >= 0
         dateIsBeforeEventEnd =
-            dateCompare date (addDay event.start event.durationInDays) <= 0
+            dateCompare date (addDay event.start event.duration) <= 0
     in
         dateIsAfterEventStart && dateIsBeforeEventEnd
 
@@ -32,14 +32,14 @@ isEventOnThisDay date event =
 nbMultipleDayEventsOnThisDay : List Event -> Date -> Int
 nbMultipleDayEventsOnThisDay events date =
     events
-        |> List.filter (\e -> isEventOnThisDay date e && e.durationInDays > 1)
+        |> List.filter (\e -> isEventOnThisDay date e && e.duration > 1)
         |> List.length
 
 
 nbSingleDayEventsOnThisDay : List Event -> Date -> Int
 nbSingleDayEventsOnThisDay events date =
     events
-        |> List.filter (\e -> e.start == date && e.durationInDays == 1)
+        |> List.filter (\e -> e.start == date && e.duration == 1)
         |> List.length
 
 
@@ -175,7 +175,7 @@ viewEvent event =
                     ]
                     []
                 _ ->
-                    event.durationInDays |> String.fromInt |> text
+                    event.duration |> String.fromInt |> text
     in
     li []
         [ span [] [ formatShort event.start |> text]

@@ -78,7 +78,7 @@ clearEventEditing model event =
             replaceEvent
                 model
                 event
-                { event | durationInDays = newDuration, editing = None }
+                { event | duration = newDuration, editing = None }
 
         None ->
             model
@@ -120,7 +120,7 @@ update msg model =
                 newEvent =
                     { id = newEventId model.events
                     , start = date
-                    , durationInDays = 1
+                    , duration = 1
                     , title = "new event"
                     , editing = None
                     }
@@ -173,6 +173,6 @@ update msg model =
             ( setEventEditing
                   model
                   event
-                  (Duration (String.fromInt event.durationInDays))
+                  (Duration (String.fromInt event.duration))
             , Cmd.none
             )
