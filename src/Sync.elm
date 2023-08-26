@@ -14,11 +14,12 @@ eventsDecoder =
 
 eventDecoder : Json.Decode.Decoder Event
 eventDecoder =
-    Json.Decode.map5 Event
+    Json.Decode.map6 Event
         (Json.Decode.field "id" Json.Decode.int)
         (Json.Decode.field "start" dateDecoder)
         (Json.Decode.field "duration" Json.Decode.int)
         (Json.Decode.field "title" Json.Decode.string)
+        (Json.Decode.field "lastUpdated" (Json.Decode.map millisToPosix Json.Decode.int))
         (Json.Decode.succeed None)
 
 

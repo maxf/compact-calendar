@@ -3,3 +3,4 @@ build
 /elm-stuff/
 src/main.js
 .env
+static/main.js

@@ -7,7 +7,8 @@ import Date exposing (Date(..), monthFromNum)
 import View exposing (view)
 import Types exposing (Msg(..), FieldBeingEdited(..), Event, Model)
 import Sync exposing (eventsEncode, eventsDecoder)
-
+import Time exposing (Posix(..), now)
+import Task exposing (perform)
 
 main =
   Browser.document
@@ -59,14 +60,14 @@ setEventEditing model event field =
         replaceEvent model event newEvent
 
 
-clearEventEditing : Model -> Event -> Model
+clearEventEditing : Model -> Event -> (Model, Cmd Msg)
 clearEventEditing model event =
     case event.editing of
         Title tmpTitle ->
-            replaceEvent
-                model
-                event
-                { event | title = tmpTitle, editing = None }
+            let
+                updatedEvent = { event | title = tmpTitle, editing = None }
+            in
+            ( model, Task.perform (SetEventUpdateTime updatedEvent) Time.now )
 
         Duration tmpDuration ->
             let
@@ -74,14 +75,12 @@ clearEventEditing model event =
                     case String.toInt tmpDuration of
                         Just val -> val
                         Nothing -> 1
+                updatedEvent = { event | duration = newDuration, editing = None }
             in
-            replaceEvent
-                model
-                event
-                { event | duration = newDuration, editing = None }
+            ( model, Task.perform (SetEventUpdateTime updatedEvent) Time.now )
 
         None ->
-            model
+            ( model, Cmd.none )
 
 
 -- We want to `setStorage` on every update, so this function adds
@@ -123,9 +122,19 @@ update msg model =
                     , duration = 1
                     , title = "new event"
                     , editing = None
+                    , lastUpdated = (Time.millisToPosix 0)
                     }
             in
-            ({model | events = List.append [newEvent] model.events}, Cmd.none)
+            ( model, Task.perform (SetEventUpdateTime newEvent) Time.now )
+
+        SetEventUpdateTime event time ->
+            let
+                updatedEvents =
+                    List.append
+                        (List.filter(\e -> e.id /= event.id) model.events)
+                        [{ event | lastUpdated = time }]
+            in
+            ( { model | events = updatedEvents }, Cmd.none )
 
         UserDeletedEvent eventToDelete ->
             ( { model | events = List.filter (\e -> e.id /= eventToDelete.id) model.events }
@@ -142,10 +151,10 @@ update msg model =
             ({ model | events = updatedEvents }, Cmd.none )
 
         UserRemovedNewTitleFocus event ->
-            ( clearEventEditing model event, Cmd.none )
+            clearEventEditing model event
 
         UserRemovedNewDurationFocus event ->
-            ( clearEventEditing model event, Cmd.none )
+            clearEventEditing model event
 
         UserClickedTitle event ->
             ( setEventEditing

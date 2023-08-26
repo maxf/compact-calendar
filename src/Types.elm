@@ -1,6 +1,7 @@
 module Types exposing (Msg(..), FieldBeingEdited(..), Event, Model)
 
 import Date exposing (Date(..))
+import Time exposing (Posix(..))
 
 type Msg
     = UserClickedOnDate Date
@@ -11,6 +12,7 @@ type Msg
     | UserClickedDuration Event
     | UserTypedInNewDuration Event String
     | UserRemovedNewDurationFocus Event
+    | SetEventUpdateTime Event Time.Posix
 
 
 type FieldBeingEdited
@@ -27,6 +29,7 @@ type alias Event =
     , start: Date
     , duration: Int
     , title: String
+    , lastUpdated: Time.Posix
     , editing: FieldBeingEdited
     }
 
