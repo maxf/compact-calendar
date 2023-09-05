@@ -186,7 +186,7 @@ viewEvent event =
               , " days): " |> text
               ]
         , titleHtml
-        , button [ onClick (UserDeletedEvent event) ] [ text "X" ]
+        , button [ onClick (UserDeletedEvent event) ] [ text "❌" ]
         ]
 
 

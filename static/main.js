@@ -6081,7 +6081,7 @@ var $author$project$View$viewEvent = function (event) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('X')
+						$elm$html$Html$text('❌')
 					]))
 			]));
 };
