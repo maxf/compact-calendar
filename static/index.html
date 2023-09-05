@@ -92,6 +92,7 @@
    app.ports.setStorage.subscribe(async function(events) {
      console.log('setstorage', events)
      localStorage.setItem('events', JSON.stringify(events));
+     localStorage.setItem('lastSync', Date.now());
      console.log('all set');
      sendEventsToTheApi(events, Date.now()); // This will overwite the API another client has modified it
    });

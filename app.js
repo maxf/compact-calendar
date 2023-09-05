@@ -30,10 +30,13 @@ app.post('/api/events/', async (req, res) => {
   console.log('/api/events/', events)
   await sql.execute('DELETE from events;');
   if (events.length === 0) { return res.status(201).json({ status: "OK (empty payload)" }) };
+
+  const placeholders = events.map(() => '(?, ?, ?, ?, ?)').join(', ');
+  const values = [].concat(...events.map(e => [e.id, e.start, e.duration, e.title, e.last_updated]));
   try {
     await sql.query(
-      'INSERT INTO events (id, start, duration, title, last_updated) VALUES (?)',
-      events.map(event => [event.id, event.start, event.duration, event.title, event.last_updated])
+      `INSERT INTO events (id, start, duration, title, last_updated) VALUES ${placeholders}`,
+      values
     );
     return res.status(201).json({ status: "OK" });
   } catch (err) {
