@@ -1,100 +1,78 @@
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
 const app = express();
 const PORT = process.env.PORT || 8888;
+let sql;
 
 app.use(bodyParser.json());
 app.use(express.static('static'));
 
-
-// Create a MySQL connection pool
-const pool = mysql.createPool({
-  host: process.env.db_host,
-  user: process.env.db_user,
-  password: process.env.db_password,
-  database: process.env.db_database,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+// Create a MySQL connection
+app.use(async (req, res, next) => {
+  sql = await mysql.createConnection({
+    host: process.env.db_host,
+    user: process.env.db_user,
+    password: process.env.db_password,
+    database: process.env.db_database,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  });
+  next();
 });
 
 // POST /events - Create a new event
-app.post('/api/events', (req, res) => {
-  const event = req.body;
-  console.log('evnet', event)
-  pool.execute(
-    'INSERT INTO events (start, duration, title) VALUES (?, ?, ?)',
-    [event.start, event.duration, event.title],
-    (err, results) => {
-      if (err) {
-        console.log('err', err)
-        res.status(500).json({ error: 'Database error' });
-      } else {
-        event.id = results.insertId;
-        res.status(201).json(event);
-      }
-    }
-  );
-});
-
-// GET /events - Get all events
-app.get('/api/events', (req, res) => {
-    pool.query('SELECT * FROM events', (err, results) => {
-        if (err) {
-            res.status(500).json({ error: 'Database error' });
-        } else {
-            res.json(results);
-        }
-    });
-});
-
-// GET /events/:id - Get a specific event by its ID
-app.get('/api/events/:id', (req, res) => {
-    const eventId = req.params.id;
-    pool.query('SELECT * FROM events WHERE id = ?', [eventId], (err, results) => {
-        if (err) {
-            res.status(500).json({ error: 'Database error' });
-        } else if (results.length === 0) {
-            res.status(404).json({ error: 'Event not found' });
-        } else {
-            res.json(results[0]);
-        }
-    });
-});
-
-// PUT /events/:id - Update a specific event by its ID
-app.put('/api/events/:id', (req, res) => {
-    const eventId = req.params.id;
-    const updatedEvent = req.body;
-    pool.execute(
-        'UPDATE events SET start = ?, duration = ?, title = ? WHERE id = ?',
-        [updatedEvent.start, updatedEvent.duration, updatedEvent.title, eventId],
-        (err) => {
-            if (err) {
-                res.status(500).json({ error: 'Database error' });
-            } else {
-                res.json(updatedEvent);
-            }
-        }
+app.post('/api/events/', async (req, res) => {
+  const events = req.body;
+  console.log('/api/events/', events)
+  await sql.execute('DELETE from events;');
+  if (events.length === 0) { return res.status(201).json({ status: "OK (empty payload)" }) };
+  try {
+    await sql.query(
+      'INSERT INTO events (id, start, duration, title, last_updated) VALUES (?)',
+      events.map(event => [event.id, event.start, event.duration, event.title, event.last_updated])
     );
+    return res.status(201).json({ status: "OK" });
+  } catch (err) {
+    console.log('err', err);
+    return res.status(500).json({ error: `POST /api/events/ error: ${err}` });
+  }
 });
 
-// DELETE /events/:id - Delete a specific event by its ID
-app.delete('/api/events/:id', (req, res) => {
-    const eventId = req.params.id;
-    pool.execute('DELETE FROM events WHERE id = ?', [eventId], (err, results) => {
-        if (err) {
-            res.status(500).json({ error: 'Database error' });
-        } else if (results.affectedRows === 0) {
-            res.status(404).json({ error: 'Event not found' });
-        } else {
-            res.json({ message: 'Event deleted' });
-        }
-    });
+app.get('/api/events/', async (req, res) => {
+  try {
+    results = await sql.query('SELECT id, start, duration, title, last_updated FROM events');
+    res.json(results[0]);
+  } catch (err) {
+    res.status(500).json({ error: `Database error: ${err}` });
+  }
 });
+
+
+app.get('/api/lastsync/', async (req, res) => {
+  try {
+    results = await sql.query('SELECT last_sync FROM meta');
+    res.json(results[0][0].last_sync);
+  } catch (err) {
+    res.status(500).json({ error: `Database error ${err}` });
+  }
+});
+
+app.post('/api/lastsync/', async (req, res) => {
+  await sql.execute('DELETE from meta;');
+  const timestamp = parseInt(req.body.timestamp, 10);
+  console.log('timestamp', timestamp);
+  try {
+    sql.execute('INSERT INTO meta (last_sync) VALUES (?)', [timestamp]);
+    res.status(200).json({ message: 'success' });
+  } catch (err) {
+    res.status(500).json({ error: `POST /api/lastsync error: ${err}` });
+  }
+});
+
 
 // ======== INDEX ===========
 
@@ -102,11 +80,8 @@ app.get('/', (req, res) => {
   res.sendFile('index.html',  { root: __dirname + '/static'});
 });
 
-
-// ======== INDEX ===========
-
-
+// ======== START ===========
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

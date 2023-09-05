@@ -73,21 +73,12 @@
 </head>
 <body>
   <div id="myapp"></div>
-  <script>
-   // Extract the stored data from previous sessions.
-   var storedData = localStorage.getItem('events');
-   var events = storedData ? JSON.parse(storedData) : null;
-   // Extract the stored data from previous sessions.
-   var storedData = localStorage.getItem('events');
-   console.log('got this from localStorage:', storedData);
-   if (Array.isArray(storedData) && storedData.length > 0) {
-     var events = JSON.parse(storedData);
-     console.log('events from LS', events)
-   } else {
-     var events = []
-   }
+  <script type="module">
+   import { sendEventsToTheApi, findEvents } from './sync.js';
 
-   console.log('events', events)
+   const events = await findEvents();
+
+   console.log('EVENTS passed to elm', events)
 
    // Load the Elm app, passing in the JS data.
    var today = new Date();
@@ -99,18 +90,10 @@
    // Listen for commands from the `setStorage` port.
    // Turn the data to a string and put it in localStorage and on the server
    app.ports.setStorage.subscribe(async function(events) {
+     console.log('setstorage', events)
      localStorage.setItem('events', JSON.stringify(events));
-     console.log("EVENTS", events)
-     for (event of events) {
-       console.log('posting event', event)
-       await fetch('/api/events', {
-         method: "POST",
-         headers: {
-           'Content-Type': 'application/json'
-         },
-         body: JSON.stringify(event)
-       });
-     }
+     console.log('all set');
+     sendEventsToTheApi(events, Date.now()); // This will overwite the API another client has modified it
    });
   </script>
 </body>

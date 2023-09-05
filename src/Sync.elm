@@ -19,7 +19,7 @@ eventDecoder =
         (Json.Decode.field "start" dateDecoder)
         (Json.Decode.field "duration" Json.Decode.int)
         (Json.Decode.field "title" Json.Decode.string)
-        (Json.Decode.field "lastUpdated" (Json.Decode.map millisToPosix Json.Decode.int))
+        (Json.Decode.field "last_updated" (Json.Decode.map millisToPosix Json.Decode.int))
         (Json.Decode.succeed None)
 
 
@@ -38,6 +38,11 @@ eventsEncode events =
     Json.Encode.list eventEncode events
 
 
+posixEncode : Time.Posix -> Json.Encode.Value
+posixEncode timestamp =
+    Json.Encode.int (timestamp |> posixToMillis)
+
+
 eventEncode : Event -> Json.Encode.Value
 eventEncode event =
     Json.Encode.object
@@ -45,4 +50,5 @@ eventEncode event =
         , ("duration", Json.Encode.int event.duration)
         , ("title", Json.Encode.string event.title)
         , ("id", Json.Encode.int event.id)
+        , ("last_updated", posixEncode event.lastUpdated)
         ]

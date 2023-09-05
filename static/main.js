@@ -4370,6 +4370,52 @@ function _Browser_load(url)
 		}
 	}));
 }
+
+
+
+function _Time_now(millisToPosix)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(millisToPosix(Date.now())));
+	});
+}
+
+var _Time_setInterval = F2(function(interval, task)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var id = setInterval(function() { _Scheduler_rawSpawn(task); }, interval);
+		return function() { clearInterval(id); };
+	});
+});
+
+function _Time_here()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		callback(_Scheduler_succeed(
+			A2($elm$time$Time$customZone, -(new Date().getTimezoneOffset()), _List_Nil)
+		));
+	});
+}
+
+
+function _Time_getZoneName()
+{
+	return _Scheduler_binding(function(callback)
+	{
+		try
+		{
+			var name = $elm$time$Time$Name(Intl.DateTimeFormat().resolvedOptions().timeZone);
+		}
+		catch (e)
+		{
+			var name = $elm$time$Time$Offset(new Date().getTimezoneOffset());
+		}
+		callback(_Scheduler_succeed(name));
+	});
+}
 var $elm$core$List$cons = _List_cons;
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var $elm$core$Array$foldr = F3(
@@ -5166,9 +5212,9 @@ var $author$project$Date$Date = F3(
 		return {$: 'Date', a: a, b: b, c: c};
 	});
 var $elm$json$Json$Decode$decodeValue = _Json_run;
-var $author$project$Types$Event = F5(
-	function (id, start, duration, title, editing) {
-		return {duration: duration, editing: editing, id: id, start: start, title: title};
+var $author$project$Types$Event = F6(
+	function (id, start, duration, title, lastUpdated, editing) {
+		return {duration: duration, editing: editing, id: id, lastUpdated: lastUpdated, start: start, title: title};
 	});
 var $author$project$Types$None = {$: 'None'};
 var $elm$core$Basics$composeL = F3(
@@ -5313,15 +5359,19 @@ var $author$project$Sync$dateDecoder = A2(
 	$elm$json$Json$Decode$map,
 	A2($elm$core$Basics$composeL, $author$project$Date$fromPosix, $elm$time$Time$millisToPosix),
 	$elm$json$Json$Decode$int);
-var $elm$json$Json$Decode$map5 = _Json_map5;
+var $elm$json$Json$Decode$map6 = _Json_map6;
 var $elm$json$Json$Decode$string = _Json_decodeString;
-var $author$project$Sync$eventDecoder = A6(
-	$elm$json$Json$Decode$map5,
+var $author$project$Sync$eventDecoder = A7(
+	$elm$json$Json$Decode$map6,
 	$author$project$Types$Event,
 	A2($elm$json$Json$Decode$field, 'id', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'start', $author$project$Sync$dateDecoder),
 	A2($elm$json$Json$Decode$field, 'duration', $elm$json$Json$Decode$int),
 	A2($elm$json$Json$Decode$field, 'title', $elm$json$Json$Decode$string),
+	A2(
+		$elm$json$Json$Decode$field,
+		'last_updated',
+		A2($elm$json$Json$Decode$map, $elm$time$Time$millisToPosix, $elm$json$Json$Decode$int)),
 	$elm$json$Json$Decode$succeed($author$project$Types$None));
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$Sync$eventsDecoder = $elm$json$Json$Decode$list($author$project$Sync$eventDecoder);
@@ -5448,6 +5498,10 @@ var $elm$json$Json$Encode$object = function (pairs) {
 			_Json_emptyObject(_Utils_Tuple0),
 			pairs));
 };
+var $author$project$Sync$posixEncode = function (timestamp) {
+	return $elm$json$Json$Encode$int(
+		$elm$time$Time$posixToMillis(timestamp));
+};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $author$project$Sync$eventEncode = function (event) {
 	return $elm$json$Json$Encode$object(
@@ -5464,7 +5518,10 @@ var $author$project$Sync$eventEncode = function (event) {
 				$elm$json$Json$Encode$string(event.title)),
 				_Utils_Tuple2(
 				'id',
-				$elm$json$Json$Encode$int(event.id))
+				$elm$json$Json$Encode$int(event.id)),
+				_Utils_Tuple2(
+				'last_updated',
+				$author$project$Sync$posixEncode(event.lastUpdated))
 			]));
 };
 var $elm$json$Json$Encode$list = F2(
@@ -5483,6 +5540,10 @@ var $author$project$Main$setStorage = _Platform_outgoingPort('setStorage', $elm$
 var $author$project$Types$Duration = function (a) {
 	return {$: 'Duration', a: a};
 };
+var $author$project$Types$SetEventUpdateTime = F2(
+	function (a, b) {
+		return {$: 'SetEventUpdateTime', a: a, b: b};
+	});
 var $author$project$Types$Title = function (a) {
 	return {$: 'Title', a: a};
 };
@@ -5492,6 +5553,53 @@ var $elm$core$List$append = F2(
 			return xs;
 		} else {
 			return A3($elm$core$List$foldr, $elm$core$List$cons, ys, xs);
+		}
+	});
+var $elm$time$Time$Name = function (a) {
+	return {$: 'Name', a: a};
+};
+var $elm$time$Time$Offset = function (a) {
+	return {$: 'Offset', a: a};
+};
+var $elm$time$Time$customZone = $elm$time$Time$Zone;
+var $elm$time$Time$now = _Time_now($elm$time$Time$millisToPosix);
+var $author$project$Main$clearEventEditing = F2(
+	function (model, event) {
+		var _v0 = event.editing;
+		switch (_v0.$) {
+			case 'Title':
+				var tmpTitle = _v0.a;
+				var updatedEvent = _Utils_update(
+					event,
+					{editing: $author$project$Types$None, title: tmpTitle});
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$core$Task$perform,
+						$author$project$Types$SetEventUpdateTime(updatedEvent),
+						$elm$time$Time$now));
+			case 'Duration':
+				var tmpDuration = _v0.a;
+				var newDuration = function () {
+					var _v1 = $elm$core$String$toInt(tmpDuration);
+					if (_v1.$ === 'Just') {
+						var val = _v1.a;
+						return val;
+					} else {
+						return 1;
+					}
+				}();
+				var updatedEvent = _Utils_update(
+					event,
+					{duration: newDuration, editing: $author$project$Types$None});
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$core$Task$perform,
+						$author$project$Types$SetEventUpdateTime(updatedEvent),
+						$elm$time$Time$now));
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
 var $elm$core$List$filter = F2(
@@ -5505,6 +5613,19 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
+var $author$project$Main$newEventId = function (events) {
+	var maxId = A3(
+		$elm$core$List$foldl,
+		$elm$core$Basics$max,
+		0,
+		A2(
+			$elm$core$List$map,
+			function ($) {
+				return $.id;
+			},
+			events));
+	return maxId + 1;
+};
 var $author$project$Main$replaceEvent = F3(
 	function (model, oldEvent, newEvent) {
 		var newEvents = A2(
@@ -5521,54 +5642,6 @@ var $author$project$Main$replaceEvent = F3(
 			model,
 			{events: newEvents});
 	});
-var $author$project$Main$clearEventEditing = F2(
-	function (model, event) {
-		var _v0 = event.editing;
-		switch (_v0.$) {
-			case 'Title':
-				var tmpTitle = _v0.a;
-				return A3(
-					$author$project$Main$replaceEvent,
-					model,
-					event,
-					_Utils_update(
-						event,
-						{editing: $author$project$Types$None, title: tmpTitle}));
-			case 'Duration':
-				var tmpDuration = _v0.a;
-				var newDuration = function () {
-					var _v1 = $elm$core$String$toInt(tmpDuration);
-					if (_v1.$ === 'Just') {
-						var val = _v1.a;
-						return val;
-					} else {
-						return 1;
-					}
-				}();
-				return A3(
-					$author$project$Main$replaceEvent,
-					model,
-					event,
-					_Utils_update(
-						event,
-						{duration: newDuration, editing: $author$project$Types$None}));
-			default:
-				return model;
-		}
-	});
-var $author$project$Main$newEventId = function (events) {
-	var maxId = A3(
-		$elm$core$List$foldl,
-		$elm$core$Basics$max,
-		0,
-		A2(
-			$elm$core$List$map,
-			function ($) {
-				return $.id;
-			},
-			events));
-	return maxId + 1;
-};
 var $author$project$Main$setEventEditing = F3(
 	function (model, event, field) {
 		var newEvent = _Utils_update(
@@ -5585,19 +5658,37 @@ var $author$project$Main$update = F2(
 					duration: 1,
 					editing: $author$project$Types$None,
 					id: $author$project$Main$newEventId(model.events),
+					lastUpdated: $elm$time$Time$millisToPosix(0),
 					start: date,
 					title: 'new event'
 				};
 				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$core$Task$perform,
+						$author$project$Types$SetEventUpdateTime(newEvent),
+						$elm$time$Time$now));
+			case 'SetEventUpdateTime':
+				var event = msg.a;
+				var time = msg.b;
+				var updatedEvents = A2(
+					$elm$core$List$append,
+					A2(
+						$elm$core$List$filter,
+						function (e) {
+							return !_Utils_eq(e.id, event.id);
+						},
+						model.events),
+					_List_fromArray(
+						[
+							_Utils_update(
+							event,
+							{lastUpdated: time})
+						]));
+				return _Utils_Tuple2(
 					_Utils_update(
 						model,
-						{
-							events: A2(
-								$elm$core$List$append,
-								_List_fromArray(
-									[newEvent]),
-								model.events)
-						}),
+						{events: updatedEvents}),
 					$elm$core$Platform$Cmd$none);
 			case 'UserDeletedEvent':
 				var eventToDelete = msg.a;
@@ -5639,14 +5730,10 @@ var $author$project$Main$update = F2(
 					$elm$core$Platform$Cmd$none);
 			case 'UserRemovedNewTitleFocus':
 				var event = msg.a;
-				return _Utils_Tuple2(
-					A2($author$project$Main$clearEventEditing, model, event),
-					$elm$core$Platform$Cmd$none);
+				return A2($author$project$Main$clearEventEditing, model, event);
 			case 'UserRemovedNewDurationFocus':
 				var event = msg.a;
-				return _Utils_Tuple2(
-					A2($author$project$Main$clearEventEditing, model, event),
-					$elm$core$Platform$Cmd$none);
+				return A2($author$project$Main$clearEventEditing, model, event);
 			case 'UserClickedTitle':
 				var event = msg.a;
 				return _Utils_Tuple2(
