@@ -24,7 +24,7 @@ isEventOnThisDay date event =
         dateIsAfterEventStart =
             dateCompare date event.start >= 0
         dateIsBeforeEventEnd =
-            dateCompare date (addDay event.start event.duration) <= 0
+            dateCompare date (addDay event.start event.duration) < 0
     in
         dateIsAfterEventStart && dateIsBeforeEventEnd
 
