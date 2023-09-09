@@ -5,10 +5,11 @@ import Html exposing (Html, button, div, text, table, thead, tbody, tr, th, td, 
 import Html.Attributes exposing (title, class, style, value)
 import Html.Events exposing (onClick, onInput, onBlur, keyCode, on)
 import Html.Events.Extra exposing (onEnter)
+import Html.Lazy exposing (lazy)
 import Time exposing (Month(..), Weekday(..))
 import Date exposing (Date(..), getYear, getDow, firstDateOfWeekZero, addDay, getDay, dateCompare, millisInDay, format, fromMonth, formatShort, dateCompare)
 import Types exposing (Msg(..), FieldBeingEdited(..), Event, Model)
-
+import Task
 
 eventSortCompare: Event -> Event -> Order
 eventSortCompare a b =
@@ -224,9 +225,9 @@ view model =
     let
         body =
             [ div [ class "columns" ]
-                  [ viewYear model
-                  , viewEvents model
-                  ]
+                [ lazy viewYear model
+                , viewEvents model
+                ]
             ]
     in
         Browser.Document "Compact calendar" body

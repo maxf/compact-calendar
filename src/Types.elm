@@ -13,6 +13,7 @@ type Msg
     | UserTypedInNewDuration Event String
     | UserRemovedNewDurationFocus Event
     | SetEventUpdateTime Event Time.Posix
+    | NoOp
 
 
 type FieldBeingEdited

@@ -1,6 +1,7 @@
 port module Main exposing (..)
 
 import Browser
+import Browser.Dom as Dom
 import Json.Encode
 import Json.Decode
 import Date exposing (Date(..), monthFromNum)
@@ -37,7 +38,7 @@ init flags =
                         []
             }
     in
-    (initialModel, Cmd.none)
+    ( initialModel, scrollToToday )
 
 
 replaceEvent : Model -> Event -> Event -> Model
@@ -185,3 +186,11 @@ update msg model =
                   (Duration (String.fromInt event.duration))
             , Cmd.none
             )
+
+        NoOp ->
+            ( model, Cmd.none )
+
+
+scrollToToday : Cmd Msg
+scrollToToday =
+    Task.perform (always NoOp) (Dom.setViewport 0 500)
