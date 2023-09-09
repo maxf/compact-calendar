@@ -142,7 +142,7 @@ viewYear model =
                    , th [] [ text "S" ]
                    ]
              ]
-             (List.map (viewWeek model) (List.range 0 52))
+             (List.map (viewWeek model) (List.range 0 104))
         )
 
 
