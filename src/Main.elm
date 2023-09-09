@@ -193,4 +193,6 @@ update msg model =
 
 scrollToToday : Cmd Msg
 scrollToToday =
-    Task.perform (always NoOp) (Dom.setViewport 0 500)
+    Dom.getElement "today"
+        |> Task.andThen (\todayCell -> (Dom.setViewport 0 (todayCell.element.y - 20)))
+        |> Task.attempt (always NoOp)

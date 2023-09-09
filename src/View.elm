@@ -2,7 +2,7 @@ module View exposing (view)
 
 import Browser
 import Html exposing (Html, button, div, text, table, thead, tbody, tr, th, td, ul, li, details, summary, span, button, input)
-import Html.Attributes exposing (title, class, style, value)
+import Html.Attributes exposing (title, class, style, value, id)
 import Html.Events exposing (onClick, onInput, onBlur, keyCode, on)
 import Html.Events.Extra exposing (onEnter)
 import Html.Lazy exposing (lazy)
@@ -77,12 +77,20 @@ viewCalendarCell model date =
                 , monthClass
                 , dayIsPastClass
                 ]
+
+        attribs =
+            [ title (format date)
+            , class cellClass
+            , onClick (UserClickedOnDate date)
+            ]
+
+        attribsWithId =
+            if dateCompare model.today date == 0 then
+                List.concat [attribs, [ id "today"]]
+            else attribs
     in
     td
-        [ title (format date)
-        , class cellClass
-        , onClick (UserClickedOnDate date)
-        ]
+        attribsWithId
         [ div
               [ class (singleDayEventsOnThisDaysClass ++ " " ++ multipleDayEventsOnThisDaysClass) ]
               [ date |> getDay |> String.fromInt |> text ]
