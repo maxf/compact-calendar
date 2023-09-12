@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise');
+var passport = require('passport');
+var LocalStrategy = require('passport-local');
+var crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 8888;
@@ -23,6 +26,55 @@ app.use(async (req, res, next) => {
   });
   next();
 });
+
+app.set('view engine', 'ejs');
+
+passport.use(new LocalStrategy(async (username, password, cb) => {
+  console.log(1)
+  try {
+    const results = await sql.execute('SELECT * FROM users WHERE username = ?', [ username ]);
+    crypto.pbkdf2(password, row.salt, 310000, 32, 'sha256', function(err, hashedPassword) {
+      if (err) { return cb(err); }
+      if (!crypto.timingSafeEqual(row.hashed_password, hashedPassword)) {
+        return cb(null, false, { message: 'Incorrect username or password.' });
+      }
+      return cb(null, row);
+    });
+  } catch(err) {
+    return res.status(500).json({ error: `auth error: ${err}` });
+  }
+}));
+
+passport.serializeUser(function(user, cb) {
+  process.nextTick(function() {
+    cb(null, { id: user.id, username: user.username });
+  });
+});
+
+passport.deserializeUser(function(user, cb) {
+  process.nextTick(function() {
+    return cb(null, user);
+  });
+});
+
+
+app.get('/login', function(req, res, next) {
+  res.render('login');
+});
+
+app.post('/login/password', passport.authenticate('local', {
+  successReturnToOrRedirect: '/',
+  failureRedirect: '/login',
+  failureMessage: true
+}));
+
+app.post('/logout', function(req, res, next) {
+  req.logout(function(err) {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
+});
+
 
 // POST /events - Create a new event
 app.post('/api/events/', async (req, res) => {
