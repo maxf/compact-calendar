@@ -181,27 +181,27 @@ getMonthNumber (Date y m d) =
 fromMonth: Month -> String
 fromMonth month =
     case month of
-        Jan -> "January"
-        Feb -> "February"
-        Mar -> "March"
-        Apr -> "April"
+        Jan -> "Jan"
+        Feb -> "Feb"
+        Mar -> "Mar"
+        Apr -> "Apr"
         May -> "May"
-        Jun -> "June"
-        Jul -> "July"
-        Aug -> "August"
-        Sep -> "September"
-        Oct -> "October"
-        Nov -> "November"
-        Dec -> "December"
+        Jun -> "Jun"
+        Jul -> "Jul"
+        Aug -> "Aug"
+        Sep -> "Sep"
+        Oct -> "Oct"
+        Nov -> "Nov"
+        Dec -> "Dec"
 
 
 fromWeekday: Weekday -> String
 fromWeekday weekday =
     case weekday of
-        Mon -> "Monday"
-        Tue -> "Tuesday"
-        Wed -> "Wednesday"
-        Thu -> "Thursday"
-        Fri -> "Friday"
-        Sat -> "Saturday"
-        Sun -> "Sunday"
+        Mon -> "Mon"
+        Tue -> "Tue"
+        Wed -> "Wed"
+        Thu -> "Thu"
+        Fri -> "Fri"
+        Sat -> "Sat"
+        Sun -> "Sun"

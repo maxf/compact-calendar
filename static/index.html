@@ -51,6 +51,7 @@
     }
     body {
       font-family: sans-serif;
+      font-size: 27px;
     }
     ul {
       padding: 0;
@@ -85,9 +86,12 @@
 <body>
   <div id="myapp"></div>
   <script type="module">
-   import { sendEventsToTheApi, findEvents } from './sync.js';
-
-   const events = await findEvents();
+   var storedData = localStorage.getItem('events');
+   if (storedData && storedData.length > 0) {
+     var events = JSON.parse(storedData);
+   } else {
+     var events = []
+   }
 
    console.log('EVENTS passed to elm', events)
 
@@ -105,7 +109,6 @@
      localStorage.setItem('events', JSON.stringify(events));
      localStorage.setItem('lastSync', Date.now());
      console.log('all set');
-     sendEventsToTheApi(events, Date.now()); // This will overwite the API another client has modified it
    });
   </script>
 </body>
