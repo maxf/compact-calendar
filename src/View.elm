@@ -44,6 +44,11 @@ nbSingleDayEventsOnThisDay events date =
         |> List.length
 
 
+dateIsABankHoliday : Model -> Date -> Bool
+dateIsABankHoliday model date =
+    List.any (\bh -> bh.date == date)  model.bankHolidays
+
+
 viewCalendarCell: Model -> Date -> Html Msg
 viewCalendarCell model date =
     let
@@ -64,6 +69,9 @@ viewCalendarCell model date =
             else
                 ""
 
+        bankHolidayClass =
+            if dateIsABankHoliday model date then "bank-holiday" else ""
+
         singleDayEventsOnThisDaysClass =
             if nbSingleDayEventsOnThisDay model.events date > 0 then "single-events" else ""
 
@@ -76,6 +84,7 @@ viewCalendarCell model date =
                 , dayClass
                 , monthClass
                 , dayIsPastClass
+                , bankHolidayClass
                 ]
 
         attribs =
@@ -141,7 +150,7 @@ viewYear model =
     table []
         (List.append
              [ tr []
-                   [ th [] [ text "Month" ]
+                   [ th [] []
                    , th [] [ text "M" ]
                    , th [] [ text "T" ]
                    , th [] [ text "W" ]

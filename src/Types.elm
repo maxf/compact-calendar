@@ -1,7 +1,8 @@
-module Types exposing (Msg(..), FieldBeingEdited(..), Event, Model)
+module Types exposing (Msg(..), FieldBeingEdited(..), Event, Model, BankHoliday)
 
 import Date exposing (Date(..))
 import Time exposing (Posix(..))
+import Http exposing (Error)
 
 type Msg
     = UserClickedOnDate Date
@@ -13,6 +14,7 @@ type Msg
     | UserTypedInNewDuration Event String
     | UserRemovedNewDurationFocus Event
     | SetEventUpdateTime Event Time.Posix
+    | GotBankHolidays (Result Http.Error (List BankHoliday))
     | NoOp
 
 
@@ -24,6 +26,11 @@ type FieldBeingEdited
 
 type alias EventId = Int
 
+type alias BankHoliday =
+    { title : String
+    , date : Date
+    , notes : String
+    }
 
 type alias Event =
     { id : EventId
@@ -36,6 +43,7 @@ type alias Event =
 
 
 type alias Model =
-    { today: Date
-    , events: List Event
+    { today : Date
+    , events : List Event
+    , bankHolidays : List BankHoliday
     }

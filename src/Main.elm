@@ -4,10 +4,11 @@ import Browser
 import Browser.Dom as Dom
 import Json.Encode
 import Json.Decode
+import Http
 import Date exposing (Date(..), monthFromNum)
 import View exposing (view)
 import Types exposing (Msg(..), FieldBeingEdited(..), Event, Model)
-import Sync exposing (eventsEncode, eventsDecoder)
+import Sync exposing (eventsEncode, eventsDecoder, bankHolidaysDecoder)
 import Time exposing (Posix(..), now)
 import Task exposing (perform)
 
@@ -36,9 +37,10 @@ init flags =
                             _ = Debug.log "Error decoding events" x
                         in
                         []
+            , bankHolidays = []
             }
     in
-    ( initialModel, scrollToToday )
+    ( initialModel, Cmd.batch [ scrollToToday, fetchBankHolidays ] )
 
 
 replaceEvent : Model -> Event -> Event -> Model
@@ -187,6 +189,17 @@ update msg model =
             , Cmd.none
             )
 
+        GotBankHolidays (Ok fetchedBankHolidays) ->
+            ( { model | bankHolidays = fetchedBankHolidays }
+            , Cmd.none
+            )
+
+        GotBankHolidays (Err e) ->
+            let
+                _ = Debug.log "Error getting bank holidays: " e
+            in
+            ( model, Cmd.none )
+
         NoOp ->
             ( model, Cmd.none )
 
@@ -196,3 +209,11 @@ scrollToToday =
     Dom.getElement "today"
         |> Task.andThen (\todayCell -> (Dom.setViewport 0 (todayCell.element.y - 20)))
         |> Task.attempt (always NoOp)
+
+
+fetchBankHolidays : Cmd Msg
+fetchBankHolidays =
+  Http.get
+    { url = "https://raw.githubusercontent.com/alphagov/frontend/main/lib/data/bank-holidays.json"
+    , expect = Http.expectJson GotBankHolidays bankHolidaysDecoder
+    }

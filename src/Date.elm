@@ -6,6 +6,7 @@ import List exposing (..)
 millisInDay : number
 millisInDay = 86400000
 
+
 dateCompare: Date -> Date -> Int
 dateCompare a b =
     (posixToMillis (toPosix a)) - (posixToMillis (toPosix b))
@@ -140,6 +141,22 @@ formatShort (Date y m d) =
         , getMonthNumber (Date y m d) |> String.fromInt
         , String.fromInt y
         ]
+
+
+fromString: String -> Maybe Date
+fromString dateString =
+    case String.split "/" dateString of
+        [ dayString, monthString, yearString ] ->
+            case String.toInt dayString of
+                Just day ->
+                    case String.toInt monthString of
+                        Just month ->
+                            case String.toInt yearString of
+                                Just year -> Just (Date year (monthFromNum (month - 1)) day)
+                                Nothing -> Nothing
+                        Nothing -> Nothing
+                Nothing -> Nothing
+        _ -> Nothing
 
 
 getDay (Date _ _ d) = d
