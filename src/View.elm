@@ -69,6 +69,12 @@ viewCalendarCell model date =
             else
                 ""
 
+        mondayClass =
+            if getDow date == Mon then "monday" else ""
+
+        oddMonthClass =
+            if remainderBy 2 (Date.getMonthNumber date) == 0 then "odd-month" else ""
+
         bankHolidayClass =
             if dateIsABankHoliday model date then "bank-holiday" else ""
 
@@ -85,6 +91,8 @@ viewCalendarCell model date =
                 , monthClass
                 , dayIsPastClass
                 , bankHolidayClass
+                , oddMonthClass
+                , mondayClass
                 ]
 
         attribs =
